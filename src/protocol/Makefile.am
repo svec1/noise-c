@@ -10,7 +10,7 @@ GOLDILOCKS_CPPFLAGS = \
 	-I$(GOLDILOCKS_SRCDIR)/p448 \
 	-I$(GOLDILOCKS_SRCDIR)/p448/@GOLDILOCKS_ARCH@
 
-AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src $(GOLDILOCKS_CPPFLAGS) -I$(top_srcdir)/src/crypto/pqclean/common
+AM_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/src $(GOLDILOCKS_CPPFLAGS)
 AM_CFLAGS = @WARNING_FLAGS@ -DKYBER_K=4
 
 if USE_OPENSSL
@@ -46,17 +46,7 @@ libnoiseprotocol_a_SOURCES = \
 	../crypto/blake2/blake2s.c \
 	../crypto/curve448/curve448.c \
 	../crypto/goldilocks/src/p448/@GOLDILOCKS_ARCH@/p448.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/cbd.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/indcpa.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/kem.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/ntt.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/poly.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/polyvec.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/reduce.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/symmetric-shake.c \
-	../crypto/pqclean/crypto_kem/kyber1024/clean/verify.c \
-	../crypto/pqclean/common/sha2.c \
-	../crypto/pqclean/common/fips202.c
+	../crypto/mlkem-libjade/src/mlkem1024_amd64_avx2/mlkem1024_amd64_avx2.s
 
 
 if USE_OPENSSL
