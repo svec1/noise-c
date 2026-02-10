@@ -5,6 +5,11 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_PROG_AS
 
 AC_PROG_CC
+AS_CASE([$host_os],
+[openbsd*], [AM_PROG_CC_C_O],
+[*],
+[])
+
 AC_PROG_CC_STDC
 AC_PROG_RANLIB
 AC_PROG_LEX
