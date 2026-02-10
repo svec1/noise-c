@@ -1,12 +1,13 @@
-
-AC_INIT([noise-c], [0.0.1])
+AC_INIT([noise-c],[0.0.1])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 
 AM_PROG_AS
 
 AC_PROG_CC
+AM_PROG_CC_C_O
 AC_PROG_CC_STDC
+
 AC_PROG_RANLIB
 AC_PROG_LEX
 AC_PROG_YACC
@@ -64,11 +65,6 @@ tests/performance/Makefile
 tools/Makefile
 tools/keytool/Makefile
 tools/protoc/Makefile
-examples/Makefile
-examples/echo/Makefile
-examples/echo/echo-client/Makefile
-examples/echo/echo-keygen/Makefile
-examples/echo/echo-server/Makefile
 doc/Makefile])
 
 AC_ARG_WITH([libsodium],
@@ -81,7 +77,6 @@ AC_ARG_WITH([openssl],
     [use openssl for crypto @<:@default=check@:>@])],
   [],
   [with_openssl=no])
-
 PKG_PROG_PKG_CONFIG
 AS_IF([test -n "$PKG_CONFIG"], [
   AS_CASE(["$with_libsodium"],
@@ -101,16 +96,25 @@ AS_IF([test -n "$PKG_CONFIG"], [
   AM_CONDITIONAL([USE_OPENSSL],[false])
 ])
 
-AC_ARG_ENABLE(asan, AC_HELP_STRING([--enable-asan],
-			[Compile with Address Sanitizer]), [
+AC_ARG_ENABLE(examples, AS_HELP_STRING([--enable-examples],[Compile with examples]), [
+    if (test "${enableval}" = "yes"); then
+		AC_CONFIG_FILES([examples/Makefile
+			examples/echo/Makefile
+			examples/echo/echo-client/Makefile
+			examples/echo/echo-keygen/Makefile
+			examples/echo/echo-server/Makefile
+		])
+	fi
+])
+
+AC_ARG_ENABLE(asan, AS_HELP_STRING([--enable-asan],[Compile with Address Sanitizer]), [
 	if (test "${enableval}" = "yes"); then
 		CFLAGS="$CFLAGS -fsanitize=address";
 		LDFLAGS="$LDFLAGS -fsanitize=address"
 	fi
 ])
 
-AC_ARG_ENABLE(ubsan, AC_HELP_STRING([--enable-ubsan],
-			[Compile with Undefined Behavior Sanitizer]), [
+AC_ARG_ENABLE(ubsan, AS_HELP_STRING([--enable-ubsan],[Compile with Undefined Behavior Sanitizer]), [
 	if (test "${enableval}" = "yes"); then
 		CFLAGS="$CFLAGS -fsanitize=undefined";
 		LDFLAGS="$LDFLAGS -fsanitize=undefined"
@@ -118,3 +122,8 @@ AC_ARG_ENABLE(ubsan, AC_HELP_STRING([--enable-ubsan],
 ])
 
 AC_OUTPUT
+m4_unquote(
+  _m4_defn([_m4_wrap_text])_m4_popdef([_m4_wrap_text]))m4_unquote(
+  _m4_defn([_m4_wrap_text])_m4_popdef([_m4_wrap_text]))
+m4_unquote(
+  _m4_defn([_m4_wrap_text])_m4_popdef([_m4_wrap_text]))
