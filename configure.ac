@@ -5,9 +5,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_PROG_AS
 
 AC_PROG_CC
-AM_PROG_CC_C_O
 AC_PROG_CC_STDC
-
 AC_PROG_RANLIB
 AC_PROG_LEX
 AC_PROG_YACC
@@ -96,16 +94,19 @@ AS_IF([test -n "$PKG_CONFIG"], [
   AM_CONDITIONAL([USE_OPENSSL],[false])
 ])
 
-AC_ARG_ENABLE(examples, AS_HELP_STRING([--enable-examples],[Compile with examples]), [
-    if (test "${enableval}" = "yes"); then
-		AC_CONFIG_FILES([examples/Makefile
-			examples/echo/Makefile
-			examples/echo/echo-client/Makefile
-			examples/echo/echo-keygen/Makefile
-			examples/echo/echo-server/Makefile
-		])
-	fi
-])
+AC_ARG_ENABLE([examples],
+  AS_HELP_STRING([--enable-examples],[Compile with examples]),
+  [enable_examples=$enableval],
+  [enable_examples=no])
+
+AS_IF([test "$enable_examples" = "yes"],
+  [AC_CONFIG_FILES([
+      examples/Makefile
+      examples/echo/Makefile
+      examples/echo/echo-client/Makefile
+      examples/echo/echo-keygen/Makefile
+      examples/echo/echo-server/Makefile
+])])
 
 AC_ARG_ENABLE(asan, AS_HELP_STRING([--enable-asan],[Compile with Address Sanitizer]), [
 	if (test "${enableval}" = "yes"); then
