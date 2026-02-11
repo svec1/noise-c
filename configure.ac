@@ -104,8 +104,9 @@ AC_ARG_ENABLE([examples],
   [enable_examples=$enableval],
   [enable_examples=no])
 
-AS_IF([test "$enable_examples" = "yes"],
-  [AC_CONFIG_FILES([
+AC_ARG_ENABLE([examples], AS_HELP_STRING([--enable-examples],[Compile with examples]), [
+  AM_CONDITIONAL([ENABLE_EXAMPLES], [test "${enableval}" = "yes"]),
+  AC_CONFIG_FILES([
       examples/Makefile
       examples/echo/Makefile
       examples/echo/echo-client/Makefile
