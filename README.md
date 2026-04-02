@@ -2,7 +2,7 @@
 CNoise Library
 ===============
 
-A light version of the noise-c implementation with cmake.
+A light version of the noise-c implementation with CMake and LibreSSL.
 
 Noise-C is a plain C implementation of the
 [Noise Protocol](http://noiseprotocol.org), intended as a
