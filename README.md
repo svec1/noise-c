@@ -1,5 +1,5 @@
 
-Noise-C Library
+CNoise Library
 ===============
 
 A light version of the noise-c implementation with cmake.
