@@ -24,8 +24,8 @@ static void noise_blake_reset(NoiseHashState *state) {
 
 static void noise_blake_update(NoiseHashState *state, const uint8_t *data, size_t len) {
     NoiseHashState_ex *st = (NoiseHashState_ex *) state;
-    assert(state->parent.hash_id == NOISE_HASH_BLAKE2s
-           || state->parent.hash_id == NOISE_HASH_BLAKE2b);
+    assert(st->parent.hash_id == NOISE_HASH_BLAKE2s
+           || st->parent.hash_id == NOISE_HASH_BLAKE2b);
 
     if (st->parent.hash_id == NOISE_HASH_BLAKE2s)
         blake2s_update(&st->b2s_ctx, data, len);
@@ -35,8 +35,8 @@ static void noise_blake_update(NoiseHashState *state, const uint8_t *data, size_
 
 static void noise_blake_finalize(NoiseHashState *state, uint8_t *hash) {
     NoiseHashState_ex *st = (NoiseHashState_ex *) state;
-    assert(((NoiseHashState_ex *) state)->parent.hash_id == NOISE_HASH_BLAKE2s
-           || ((NoiseHashState_ex *) state)->parent.hash_id == NOISE_HASH_BLAKE2b);
+    assert(st->parent.hash_id == NOISE_HASH_BLAKE2s
+           || st->parent.hash_id == NOISE_HASH_BLAKE2b);
 
     if (st->parent.hash_id == NOISE_HASH_BLAKE2s)
         blake2s_final(&st->b2s_ctx, hash, st->parent.hash_len);

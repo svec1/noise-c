@@ -1,14 +1,13 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-option(O_PROTOBUFS "Compile source of protobufs." OFF)
-option(O_EXAMPLES "Compile examples." OFF)
-option(O_TESTS "Compile tests." ON)
-option(O_VECTOR_TESTS "Compile vector tests." OFF)
+option(CNOISE_PROTOBUFS "Compile source of protobufs." OFF)
+option(CNOISE_EXAMPLES "Compile examples." OFF)
+option(CNOISE_TESTS "Compile tests." ON)
+option(CNOISE_VECTOR_TESTS "Compile vector tests." OFF)
 
 set(NAME_PROJECT_CNOISE cnoise)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
-set(CMAKE_C_COMPILER clang)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/portable;${CMAKE_MODULE_PATH}")
 
 file(GLOB_RECURSE CRYPTO_SOURCE_FILES src/crypto/*.c)
@@ -53,7 +52,7 @@ target_include_directories(
     thirdparty/mlkem-libjade/src
 )
 
-if(O_EXAMPLES)
+if(CNOISE_EXAMPLES)
     set(NAME_ECHO_CLIENT echo_client)
     set(NAME_ECHO_SERVER echo_server)
     set(NAME_ECHO_KEYGEN echo_keygen)
@@ -71,7 +70,7 @@ if(O_EXAMPLES)
     target_link_libraries(${NAME_ECHO_KEYGEN} ${NAME_PROJECT_CNOISE})
 endif()
 
-if(O_TESTS)
+if(CNOISE_TESTS)
     set(NAME_TEST_UNITS_CNOISE test_units_cnoise)
     set(NAME_TEST_PERFORMANCE_CNOISE test_performance_cnoise)
     file(GLOB_RECURSE TEST_UNITS_SOURCE_FILES tests/unit/*.c)
@@ -96,7 +95,7 @@ if(O_TESTS)
     add_test(NAME TEST_UNITS_CNOISE COMMAND ${NAME_TEST_UNITS_CNOISE})
     add_test(NAME TEST_PERFORMANCE_CNOISE COMMAND ${NAME_TEST_PERFORMANCE_CNOISE})
 endif()
-if(O_VECTOR_TESTS)
+if(CNOISE_VECTOR_TESTS)
     set(NAME_TEST_VECTOR_CNOISE test_vector_cnoise)
     set(NAME_TEST_VECTOR_GEN_CNOISE test_vector_gen_cnoise)
     
