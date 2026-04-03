@@ -46,81 +46,78 @@
 /** @cond */
 
 /* List of all known algorithm names and the corresponding identifiers */
-typedef struct
-{
-    int id;
+typedef struct {
+    int         id;
     const char *name;
-    size_t name_len;
+    size_t      name_len;
 
 } NoiseIdMapping;
 static NoiseIdMapping const algorithm_names[] = {
     /* Cipher algorithsm */
-    {NOISE_CIPHER_CHACHAPOLY,   "ChaChaPoly",   10},
-    {NOISE_CIPHER_AESGCM,       "AESGCM",        6},
+    {NOISE_CIPHER_CHACHAPOLY, "ChaChaPoly", 10},
+    {NOISE_CIPHER_AESGCM, "AESGCM", 6},
 
     /* Hash algorithms */
-    {NOISE_HASH_BLAKE2s,        "BLAKE2s",       7},
-    {NOISE_HASH_BLAKE2b,        "BLAKE2b",       7},
-    {NOISE_HASH_SHA256,         "SHA256",        6},
-    {NOISE_HASH_SHA512,         "SHA512",        6},
+    {NOISE_HASH_BLAKE2s, "BLAKE2s", 7},
+    {NOISE_HASH_BLAKE2b, "BLAKE2b", 7},
+    {NOISE_HASH_SHA256, "SHA256", 6},
+    {NOISE_HASH_SHA512, "SHA512", 6},
 
     /* Diffie-Hellman algorithms */
-    {NOISE_DH_CURVE25519,       "25519",         5},
-    {NOISE_DH_CURVE448,         "448",           3},
-    {NOISE_DH_KYBER1024,        "Kyber1024",     9},
+    {NOISE_DH_CURVE25519, "25519", 5},
+    {NOISE_DH_KYBER1024, "Kyber1024", 9},
 
     /* Handshake patterns */
-    {NOISE_PATTERN_N,           "N",             1},
-    {NOISE_PATTERN_X,           "X",             1},
-    {NOISE_PATTERN_K,           "K",             1},
-    {NOISE_PATTERN_NN,          "NN",            2},
-    {NOISE_PATTERN_NK,          "NK",            2},
-    {NOISE_PATTERN_NX,          "NX",            2},
-    {NOISE_PATTERN_XN,          "XN",            2},
-    {NOISE_PATTERN_XK,          "XK",            2},
-    {NOISE_PATTERN_XX,          "XX",            2},
-    {NOISE_PATTERN_KN,          "KN",            2},
-    {NOISE_PATTERN_KK,          "KK",            2},
-    {NOISE_PATTERN_KX,          "KX",            2},
-    {NOISE_PATTERN_IN,          "IN",            2},
-    {NOISE_PATTERN_IK,          "IK",            2},
-    {NOISE_PATTERN_IX,          "IX",            2},
-    {NOISE_PATTERN_XX_FALLBACK, "XXfallback",   10},
-    {NOISE_PATTERN_X_NOIDH,     "Xnoidh",        6},
-    {NOISE_PATTERN_NX_NOIDH,    "NXnoidh",       7},
-    {NOISE_PATTERN_XX_NOIDH,    "XXnoidh",       7},
-    {NOISE_PATTERN_KX_NOIDH,    "KXnoidh",       7},
-    {NOISE_PATTERN_IK_NOIDH,    "IKnoidh",       7},
-    {NOISE_PATTERN_IX_NOIDH,    "IXnoidh",       7},
-    {NOISE_PATTERN_NN_HFS,      "NNhfs",         5},
-    {NOISE_PATTERN_NK_HFS,      "NKhfs",         5},
-    {NOISE_PATTERN_NX_HFS,      "NXhfs",         5},
-    {NOISE_PATTERN_XN_HFS,      "XNhfs",         5},
-    {NOISE_PATTERN_XK_HFS,      "XKhfs",         5},
-    {NOISE_PATTERN_XX_HFS,      "XXhfs",         5},
-    {NOISE_PATTERN_KN_HFS,      "KNhfs",         5},
-    {NOISE_PATTERN_KK_HFS,      "KKhfs",         5},
-    {NOISE_PATTERN_KX_HFS,      "KXhfs",         5},
-    {NOISE_PATTERN_IN_HFS,      "INhfs",         5},
-    {NOISE_PATTERN_IK_HFS,      "IKhfs",         5},
-    {NOISE_PATTERN_IX_HFS,      "IXhfs",         5},
+    {NOISE_PATTERN_N, "N", 1},
+    {NOISE_PATTERN_X, "X", 1},
+    {NOISE_PATTERN_K, "K", 1},
+    {NOISE_PATTERN_NN, "NN", 2},
+    {NOISE_PATTERN_NK, "NK", 2},
+    {NOISE_PATTERN_NX, "NX", 2},
+    {NOISE_PATTERN_XN, "XN", 2},
+    {NOISE_PATTERN_XK, "XK", 2},
+    {NOISE_PATTERN_XX, "XX", 2},
+    {NOISE_PATTERN_KN, "KN", 2},
+    {NOISE_PATTERN_KK, "KK", 2},
+    {NOISE_PATTERN_KX, "KX", 2},
+    {NOISE_PATTERN_IN, "IN", 2},
+    {NOISE_PATTERN_IK, "IK", 2},
+    {NOISE_PATTERN_IX, "IX", 2},
+    {NOISE_PATTERN_XX_FALLBACK, "XXfallback", 10},
+    {NOISE_PATTERN_X_NOIDH, "Xnoidh", 6},
+    {NOISE_PATTERN_NX_NOIDH, "NXnoidh", 7},
+    {NOISE_PATTERN_XX_NOIDH, "XXnoidh", 7},
+    {NOISE_PATTERN_KX_NOIDH, "KXnoidh", 7},
+    {NOISE_PATTERN_IK_NOIDH, "IKnoidh", 7},
+    {NOISE_PATTERN_IX_NOIDH, "IXnoidh", 7},
+    {NOISE_PATTERN_NN_HFS, "NNhfs", 5},
+    {NOISE_PATTERN_NK_HFS, "NKhfs", 5},
+    {NOISE_PATTERN_NX_HFS, "NXhfs", 5},
+    {NOISE_PATTERN_XN_HFS, "XNhfs", 5},
+    {NOISE_PATTERN_XK_HFS, "XKhfs", 5},
+    {NOISE_PATTERN_XX_HFS, "XXhfs", 5},
+    {NOISE_PATTERN_KN_HFS, "KNhfs", 5},
+    {NOISE_PATTERN_KK_HFS, "KKhfs", 5},
+    {NOISE_PATTERN_KX_HFS, "KXhfs", 5},
+    {NOISE_PATTERN_IN_HFS, "INhfs", 5},
+    {NOISE_PATTERN_IK_HFS, "IKhfs", 5},
+    {NOISE_PATTERN_IX_HFS, "IXhfs", 5},
     {NOISE_PATTERN_XX_FALLBACK_HFS, "XXfallback+hfs", 14},
-    {NOISE_PATTERN_NX_NOIDH_HFS,"NXnoidh+hfs",  11},
-    {NOISE_PATTERN_XX_NOIDH_HFS,"XXnoidh+hfs",  11},
-    {NOISE_PATTERN_KX_NOIDH_HFS,"KXnoidh+hfs",  11},
-    {NOISE_PATTERN_IK_NOIDH_HFS,"IKnoidh+hfs",  11},
-    {NOISE_PATTERN_IX_NOIDH_HFS,"IXnoidh+hfs",  11},
+    {NOISE_PATTERN_NX_NOIDH_HFS, "NXnoidh+hfs", 11},
+    {NOISE_PATTERN_XX_NOIDH_HFS, "XXnoidh+hfs", 11},
+    {NOISE_PATTERN_KX_NOIDH_HFS, "KXnoidh+hfs", 11},
+    {NOISE_PATTERN_IK_NOIDH_HFS, "IKnoidh+hfs", 11},
+    {NOISE_PATTERN_IX_NOIDH_HFS, "IXnoidh+hfs", 11},
 
     /* Protocol name prefixes */
-    {NOISE_PREFIX_STANDARD,     "Noise",         5},
-    {NOISE_PREFIX_PSK,          "NoisePSK",      8},
+    {NOISE_PREFIX_STANDARD, "Noise", 5},
+    {NOISE_PREFIX_PSK, "NoisePSK", 8},
 
     /* Signature algorithms */
-    {NOISE_SIGN_ED25519,        "Ed25519",       7},
+    {NOISE_SIGN_ED25519, "Ed25519", 7},
 
     /* Terminator for the list */
-    {0,                         0,               0}
-};
+    {0, 0, 0}};
 
 /** @endcond */
 
@@ -143,16 +140,14 @@ static NoiseIdMapping const algorithm_names[] = {
  *
  * \sa noise_id_to_name()
  */
-int noise_name_to_id(int category, const char *name, size_t name_len)
-{
+int noise_name_to_id(int category, const char *name, size_t name_len) {
     const NoiseIdMapping *mapping = algorithm_names;
-    int mask = category ? NOISE_ID(0xFF, 0) : 0;
+    int                   mask    = category ? NOISE_ID(0xFF, 0) : 0;
     if (!name)
         return 0;
     while (mapping->name_len) {
         if ((mapping->id & mask) == category) {
-            if (mapping->name_len == name_len &&
-                    !memcmp(mapping->name, name, name_len)) {
+            if (mapping->name_len == name_len && !memcmp(mapping->name, name, name_len)) {
                 return mapping->id;
             }
         }
@@ -179,10 +174,9 @@ int noise_name_to_id(int category, const char *name, size_t name_len)
  *
  * \sa noise_name_to_id()
  */
-const char *noise_id_to_name(int category, int id)
-{
+const char *noise_id_to_name(int category, int id) {
     const NoiseIdMapping *mapping = algorithm_names;
-    int mask = category ? NOISE_ID(0xFF, 0) : 0;
+    int                   mask    = category ? NOISE_ID(0xFF, 0) : 0;
     if (id <= 0)
         return 0;
     while (mapping->name_len) {
@@ -211,12 +205,10 @@ const char *noise_id_to_name(int category, int id)
  * \return The algorithm identifier for the current field, or zero
  * if the field's contents are not a recognized name for this field.
  */
-static int noise_protocol_parse_field
-    (int category, const char *name, size_t len, size_t *posn,
-     int is_last, int *ok)
-{
+static int noise_protocol_parse_field(int category, const char *name, size_t len,
+                                      size_t *posn, int is_last, int *ok) {
     size_t start, field_len;
-    int id;
+    int    id;
 
     /* If the parse already failed, then nothing further to do */
     if (!(*ok))
@@ -240,7 +232,7 @@ static int noise_protocol_parse_field
             *ok = 0;
             return 0;
         }
-        ++(*posn);  /* Skip the '_' */
+        ++(*posn); /* Skip the '_' */
     }
 
     /* Look up the name in the current category */
@@ -267,12 +259,10 @@ static int noise_protocol_parse_field
  * current field, or zero if the field's contents are not a recognized
  * dual name for this field.
  */
-static int noise_protocol_parse_dual_field
-    (int category, const char *name, size_t len,
-     size_t *posn, int *second_id, int *ok)
-{
+static int noise_protocol_parse_dual_field(int category, const char *name, size_t len,
+                                           size_t *posn, int *second_id, int *ok) {
     size_t start, field_len;
-    int first_id;
+    int    first_id;
 
     /* Clear the second identifier before we start in case we don't find one */
     *second_id = 0;
@@ -328,11 +318,9 @@ static int noise_protocol_parse_dual_field
  *
  * \sa noise_protocol_id_to_name()
  */
-int noise_protocol_name_to_id
-    (NoiseProtocolId *id, const char *name, size_t name_len)
-{
+int noise_protocol_name_to_id(NoiseProtocolId *id, const char *name, size_t name_len) {
     size_t posn;
-    int ok;
+    int    ok;
 
     /* Bail out if the parameters are incorrect */
     if (!id || !name)
@@ -340,18 +328,18 @@ int noise_protocol_name_to_id
 
     /* Parse underscore-separated fields from the name */
     posn = 0;
-    ok = 1;
+    ok   = 1;
     memset(id, 0, sizeof(NoiseProtocolId));
-    id->prefix_id = noise_protocol_parse_field
-        (NOISE_PREFIX_CATEGORY, name, name_len, &posn, 0, &ok);
-    id->pattern_id = noise_protocol_parse_field
-        (NOISE_PATTERN_CATEGORY, name, name_len, &posn, 0, &ok);
-    id->dh_id = noise_protocol_parse_dual_field
-        (NOISE_DH_CATEGORY, name, name_len, &posn, &(id->hybrid_id), &ok);
-    id->cipher_id = noise_protocol_parse_field
-        (NOISE_CIPHER_CATEGORY, name, name_len, &posn, 0, &ok);
-    id->hash_id = noise_protocol_parse_field
-        (NOISE_HASH_CATEGORY, name, name_len, &posn, 1, &ok);
+    id->prefix_id =
+        noise_protocol_parse_field(NOISE_PREFIX_CATEGORY, name, name_len, &posn, 0, &ok);
+    id->pattern_id =
+        noise_protocol_parse_field(NOISE_PATTERN_CATEGORY, name, name_len, &posn, 0, &ok);
+    id->dh_id = noise_protocol_parse_dual_field(NOISE_DH_CATEGORY, name, name_len, &posn,
+                                                &(id->hybrid_id), &ok);
+    id->cipher_id =
+        noise_protocol_parse_field(NOISE_CIPHER_CATEGORY, name, name_len, &posn, 0, &ok);
+    id->hash_id =
+        noise_protocol_parse_field(NOISE_HASH_CATEGORY, name, name_len, &posn, 1, &ok);
 
     /* If there was a parse error, then clear everything */
     if (!ok) {
@@ -376,12 +364,10 @@ int noise_protocol_name_to_id
  * \param err Points to an error code.  Initialized to NOISE_ERROR_NONE
  * by the caller and updated by this function if there is an error.
  */
-static void noise_protocol_format_field
-    (int category, int id, char *name, size_t len, size_t *posn,
-     int is_last, int *err)
-{
+static void noise_protocol_format_field(int category, int id, char *name, size_t len,
+                                        size_t *posn, int is_last, int *err) {
     const char *alg_name;
-    size_t alg_len;
+    size_t      alg_len;
 
     /* If the formatting already failed, then bail out now */
     if (*err != NOISE_ERROR_NONE)
@@ -433,16 +419,14 @@ static void noise_protocol_format_field
  *
  * \sa noise_protocol_name_to_id()
  */
-int noise_protocol_id_to_name
-    (char *name, size_t name_len, const NoiseProtocolId *id)
-{
+int noise_protocol_id_to_name(char *name, size_t name_len, const NoiseProtocolId *id) {
     size_t posn;
-    int err;
+    int    err;
 
     /* Bail out if the parameters are incorrect */
     if (!id) {
         if (name && name_len)
-            *name = '\0';   /* Just to be safe */
+            *name = '\0'; /* Just to be safe */
         return NOISE_ERROR_INVALID_PARAM;
     }
     if (!name)
@@ -452,36 +436,37 @@ int noise_protocol_id_to_name
 
     /* Format the fields into the return buffer */
     posn = 0;
-    err = NOISE_ERROR_NONE;
-    noise_protocol_format_field
-        (NOISE_PREFIX_CATEGORY, id->prefix_id, name, name_len, &posn, 0, &err);
-    noise_protocol_format_field
-        (NOISE_PATTERN_CATEGORY, id->pattern_id, name, name_len, &posn, 0, &err);
+    err  = NOISE_ERROR_NONE;
+    noise_protocol_format_field(NOISE_PREFIX_CATEGORY, id->prefix_id, name, name_len,
+                                &posn, 0, &err);
+    noise_protocol_format_field(NOISE_PATTERN_CATEGORY, id->pattern_id, name, name_len,
+                                &posn, 0, &err);
     if (!id->hybrid_id) {
-        noise_protocol_format_field
-            (NOISE_DH_CATEGORY, id->dh_id, name, name_len, &posn, 0, &err);
+        noise_protocol_format_field(NOISE_DH_CATEGORY, id->dh_id, name, name_len, &posn,
+                                    0, &err);
     } else {
         /* Format the DH names as "dh_id+hybrid_id"; e.g. "25519+NewHope" */
-        noise_protocol_format_field
-            (NOISE_DH_CATEGORY, id->dh_id, name, name_len, &posn, 1, &err);
+        noise_protocol_format_field(NOISE_DH_CATEGORY, id->dh_id, name, name_len, &posn,
+                                    1, &err);
         if (err == NOISE_ERROR_NONE) {
             if ((posn + 1) < name_len)
                 name[posn++] = '+';
             else
                 err = NOISE_ERROR_INVALID_LENGTH;
         }
-        noise_protocol_format_field
-            (NOISE_DH_CATEGORY, id->hybrid_id, name, name_len, &posn, 0, &err);
+        noise_protocol_format_field(NOISE_DH_CATEGORY, id->hybrid_id, name, name_len,
+                                    &posn, 0, &err);
     }
-    noise_protocol_format_field
-        (NOISE_CIPHER_CATEGORY, id->cipher_id, name, name_len, &posn, 0, &err);
-    noise_protocol_format_field
-        (NOISE_HASH_CATEGORY, id->hash_id, name, name_len, &posn, 1, &err);
+    noise_protocol_format_field(NOISE_CIPHER_CATEGORY, id->cipher_id, name, name_len,
+                                &posn, 0, &err);
+    noise_protocol_format_field(NOISE_HASH_CATEGORY, id->hash_id, name, name_len, &posn,
+                                1, &err);
 
     /* The reserved identifiers must be zero.  We don't know how to
        format reserved identifiers other than zero */
-    for (posn = 0; posn < (sizeof(id->reserved) / sizeof(id->reserved[0])) &&
-                   err == NOISE_ERROR_NONE; ++posn) {
+    for (posn = 0; posn < (sizeof(id->reserved) / sizeof(id->reserved[0]))
+                   && err == NOISE_ERROR_NONE;
+         ++posn) {
         if (id->reserved[posn] != 0)
             err = NOISE_ERROR_UNKNOWN_ID;
     }

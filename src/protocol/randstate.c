@@ -19,14 +19,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include <openssl/evp.h>
+#include <string.h>
 
 #include "internal.h"
-#if USE_LIBSODIUM
-#include <sodium.h>
-#else
-#include "crypto/chacha/chacha.h"
-#endif
-#include <string.h>
 
 /**
  * \file randstate.h
@@ -64,8 +60,7 @@
 /**
  * \brief State information for random number generators.
  */
-struct NoiseRandState_s
-{
+struct NoiseRandState_s {
     /** \brief Total size of the structure */
     size_t size;
 
@@ -73,29 +68,22 @@ struct NoiseRandState_s
     size_t left;
 
     /** \brief ChaCha20 state for the random number generator */
-#if USE_LIBSODIUM
-    uint8_t chacha_k[crypto_stream_chacha20_KEYBYTES];
-    uint8_t chacha_n[crypto_stream_chacha20_IETF_NONCEBYTES];
-#else
-    chacha_ctx chacha;
-#endif
+    EVP_CIPHER_CTX *chacha_ctx;
 };
 
 /** Number of bytes to generate before forcing a reseed */
 #define NOISE_RAND_RESEED_COUNT 1600000
 
 /** Force a rekey after this many blocks */
-#define NOISE_RAND_REKEY_COUNT  16
+#define NOISE_RAND_REKEY_COUNT 16
 
 /* Starting key for the random state before the first reseed.
    This is the SHA256 initialization vector, to introduce a
    little chaos into the starting state. */
-static uint8_t const starting_key[32] = {
-      0x6A, 0x09, 0xE6, 0x67, 0xBB, 0x67, 0xAE, 0x85,
-      0x3C, 0x6E, 0xF3, 0x72, 0xA5, 0x4F, 0xF5, 0x3A,
-      0x51, 0x0E, 0x52, 0x7F, 0x9B, 0x05, 0x68, 0x8C,
-      0x1F, 0x83, 0xD9, 0xAB, 0x5B, 0xE0, 0xCD, 0x19
-};
+static uint8_t const starting_key[32] = {0x6A, 0x09, 0xE6, 0x67, 0xBB, 0x67, 0xAE, 0x85,
+                                         0x3C, 0x6E, 0xF3, 0x72, 0xA5, 0x4F, 0xF5, 0x3A,
+                                         0x51, 0x0E, 0x52, 0x7F, 0x9B, 0x05, 0x68, 0x8C,
+                                         0x1F, 0x83, 0xD9, 0xAB, 0x5B, 0xE0, 0xCD, 0x19};
 
 /** @endcond */
 
@@ -112,8 +100,7 @@ static uint8_t const starting_key[32] = {
  *
  * \sa noise_randstate_free(), noise_randstate_generate()
  */
-int noise_randstate_new(NoiseRandState **state)
-{
+int noise_randstate_new(NoiseRandState **state) {
     /* Validate the parameter */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -124,12 +111,10 @@ int noise_randstate_new(NoiseRandState **state)
         return NOISE_ERROR_NO_MEMORY;
 
     /* Initialize the random number generator */
-#if USE_LIBSODIUM
-    memcpy((*state)->chacha_k, starting_key, crypto_stream_chacha20_KEYBYTES);
-    memset((*state)->chacha_n, 0, crypto_stream_chacha20_IETF_NONCEBYTES);
-#else
-    chacha_keysetup(&((*state)->chacha), starting_key, 256);
-#endif
+    uint8_t nonce_tmp[32] = {0};
+    (*state)->chacha_ctx  = EVP_CIPHER_CTX_new();
+    EVP_EncryptInit_ex((*state)->chacha_ctx, EVP_chacha20(), NULL, starting_key,
+                       nonce_tmp);
     noise_randstate_reseed((*state));
     return NOISE_ERROR_NONE;
 }
@@ -144,8 +129,7 @@ int noise_randstate_new(NoiseRandState **state)
  *
  * \sa noise_randstate_new()
  */
-int noise_randstate_free(NoiseRandState *state)
-{
+int noise_randstate_free(NoiseRandState *state) {
     /* Validate the parameter */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -174,13 +158,8 @@ int noise_randstate_free(NoiseRandState *state)
  *
  * \sa noise_randstate_generate()
  */
-int noise_randstate_reseed(NoiseRandState *state)
-{
-#if USE_LIBSODIUM
-    uint8_t data[crypto_stream_chacha20_KEYBYTES + crypto_stream_chacha20_IETF_NONCEBYTES];
-#else
+int noise_randstate_reseed(NoiseRandState *state) {
     uint8_t data[40];
-#endif
 
     /* Validate the parameter */
     if (!state)
@@ -188,29 +167,20 @@ int noise_randstate_reseed(NoiseRandState *state)
 
     /* Get new random data from the operating system, encrypt it
        with the previous key/IV, and then replace the key/IV */
+    size_t data_len = sizeof(data);
     noise_rand_bytes(data, sizeof(data));
-#if USE_LIBSODIUM
-    crypto_stream_chacha20_ietf_xor(data, data, sizeof(data), state->chacha_n, state->chacha_k);
-    memcpy(state->chacha_k, data, crypto_stream_chacha20_KEYBYTES);
-    memcpy(state->chacha_n, data + crypto_stream_chacha20_KEYBYTES, crypto_stream_chacha20_IETF_NONCEBYTES);
-#else
-    chacha_encrypt_bytes(&(state->chacha), data, data, sizeof(data));
-    chacha_keysetup(&(state->chacha), data, 256);
-    chacha_ivsetup(&(state->chacha), data + 32, 0);
-#endif
+    EVP_EncryptUpdate(state->chacha_ctx, data, (int *) &data_len, data, sizeof(data));
+    EVP_EncryptFinal_ex(state->chacha_ctx, data, (int *) &data_len);
+    EVP_EncryptInit_ex(state->chacha_ctx, EVP_chacha20(), NULL, starting_key, data + 32);
+
     state->left = NOISE_RAND_RESEED_COUNT;
 
     /* And force a rekey as well for good measure */
     memset(data, 0, sizeof(data));
-#if USE_LIBSODIUM
-    crypto_stream_chacha20_ietf_xor(data, data, sizeof(data), state->chacha_n, state->chacha_k);
-    memcpy(state->chacha_k, data, crypto_stream_chacha20_KEYBYTES);
-    memcpy(state->chacha_n, data + crypto_stream_chacha20_KEYBYTES, crypto_stream_chacha20_IETF_NONCEBYTES);
-#else
-    chacha_encrypt_bytes(&(state->chacha), data, data, sizeof(data));
-    chacha_keysetup(&(state->chacha), data, 256);
-    chacha_ivsetup(&(state->chacha), data + 32, 0);
-#endif
+    EVP_EncryptUpdate(state->chacha_ctx, data, (int *) &data_len, data, sizeof(data));
+    EVP_EncryptFinal_ex(state->chacha_ctx, data, (int *) &data_len);
+    EVP_EncryptInit_ex(state->chacha_ctx, EVP_chacha20(), NULL, starting_key, data + 32);
+
     noise_clean(data, sizeof(data));
 
     /* Ready to go */
@@ -222,23 +192,16 @@ int noise_randstate_reseed(NoiseRandState *state)
  *
  * \param state The state of the random number generator.
  */
-static void noise_randstate_rekey(NoiseRandState *state)
-{
-#if USE_LIBSODIUM
-    uint8_t data[crypto_stream_chacha20_KEYBYTES + crypto_stream_chacha20_IETF_NONCEBYTES];
-#else
+static void noise_randstate_rekey(NoiseRandState *state) {
     uint8_t data[40];
-#endif
+    int     data_len = sizeof(data);
+
     memset(data, 0, sizeof(data));
-#if USE_LIBSODIUM
-    crypto_stream_chacha20_ietf_xor(data, data, sizeof(data), state->chacha_n, state->chacha_k);
-    memcpy(state->chacha_k, data, crypto_stream_chacha20_KEYBYTES);
-    memcpy(state->chacha_n, data + crypto_stream_chacha20_KEYBYTES, crypto_stream_chacha20_IETF_NONCEBYTES);
-#else
-    chacha_encrypt_bytes(&(state->chacha), data, data, sizeof(data));
-    chacha_keysetup(&(state->chacha), data, 256);
-    chacha_ivsetup(&(state->chacha), data + 32, 0);
-#endif
+
+    EVP_EncryptUpdate(state->chacha_ctx, data, (int *) &data_len, data, sizeof(data));
+    EVP_EncryptFinal_ex(state->chacha_ctx, data, (int *) &data_len);
+    EVP_EncryptInit_ex(state->chacha_ctx, EVP_chacha20(), NULL, starting_key, data + 32);
+
     noise_clean(data, sizeof(data));
 }
 
@@ -260,9 +223,7 @@ static void noise_randstate_rekey(NoiseRandState *state)
  * \sa noise_randstate_pad(), noise_randstate_reseed(),
  * noise_randstate_generate_simple()
  */
-int noise_randstate_generate
-    (NoiseRandState *state, uint8_t *buffer, size_t len)
-{
+int noise_randstate_generate(NoiseRandState *state, uint8_t *buffer, size_t len) {
     size_t blocks;
     size_t temp_len;
 
@@ -299,11 +260,7 @@ int noise_randstate_generate
             noise_randstate_rekey(state);
             blocks = 0;
         }
-#if USE_LIBSODIUM
-        crypto_stream_chacha20_ietf_xor_ic(buffer, buffer, temp_len, state->chacha_n, blocks + 1, state->chacha_k);
-#else
-        chacha_encrypt_bytes(&(state->chacha), buffer, buffer, temp_len);
-#endif
+        EVP_EncryptUpdate(state->chacha_ctx, buffer, (int *) &temp_len, buffer, temp_len);
         buffer += temp_len;
         len -= temp_len;
     }
@@ -345,10 +302,8 @@ int noise_randstate_generate
  *
  * \sa noise_cipherstate_rand_bytes()
  */
-int noise_randstate_pad
-    (NoiseRandState *state, uint8_t *payload, size_t orig_len,
-     size_t padded_len, int padding_mode)
-{
+int noise_randstate_pad(NoiseRandState *state, uint8_t *payload, size_t orig_len,
+                        size_t padded_len, int padding_mode) {
     /* Validate the parameters */
     if (!payload)
         return NOISE_ERROR_INVALID_PARAM;
@@ -369,8 +324,7 @@ int noise_randstate_pad
         memset(payload + orig_len, 0, padded_len - orig_len);
         return NOISE_ERROR_NONE;
     } else {
-        return noise_randstate_generate
-            (state, payload + orig_len, padded_len - orig_len);
+        return noise_randstate_generate(state, payload + orig_len, padded_len - orig_len);
     }
 }
 
@@ -388,9 +342,9 @@ int noise_randstate_pad
  *
  * \sa noise_randstate_generate()
  */
-int noise_randstate_generate_simple(uint8_t *buffer, size_t len)
-{
+int noise_randstate_generate_simple(uint8_t *buffer, size_t len) {
     NoiseRandState state;
+    uint8_t        nonce_tmp[32] = {0};
 
     /* Validate the parameters */
     if (!buffer)
@@ -398,12 +352,7 @@ int noise_randstate_generate_simple(uint8_t *buffer, size_t len)
 
     /* Initialize the random number generator on the stack */
     memset(&state, 0, sizeof(state));
-#if USE_LIBSODIUM
-    memcpy(state.chacha_k, starting_key, crypto_stream_chacha20_KEYBYTES);
-    memset(state.chacha_n, 0, crypto_stream_chacha20_IETF_NONCEBYTES);
-#else
-    chacha_keysetup(&(state.chacha), starting_key, 256);
-#endif
+    EVP_EncryptInit_ex(state.chacha_ctx, EVP_chacha20(), NULL, starting_key, nonce_tmp);
     noise_randstate_reseed(&state);
 
     /* Generate the required data */

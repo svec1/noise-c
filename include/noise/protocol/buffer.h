@@ -30,15 +30,14 @@
 extern "C" {
 #endif
 
-typedef struct
-{
-    uint8_t *data;      /**< Points to the data in the buffer */
-    size_t size;        /**< Current size of the data in the buffer */
-    size_t max_size;    /**< Maximum size of the data in the buffer */
+typedef struct {
+    uint8_t *data;     /**< Points to the data in the buffer */
+    size_t   size;     /**< Current size of the data in the buffer */
+    size_t   max_size; /**< Maximum size of the data in the buffer */
 
 } NoiseBuffer;
 
-#define noise_buffer_init(buffer)   \
+#define noise_buffer_init(buffer) \
     ((buffer).data = 0, (buffer).size = 0, (buffer).max_size = 0)
 #define noise_buffer_set_output(buffer, ptr, len) \
     ((buffer).data = (ptr), (buffer).size = 0, (buffer).max_size = (len))

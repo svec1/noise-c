@@ -32,32 +32,26 @@ extern "C" {
 
 typedef struct NoiseHashState_s NoiseHashState;
 
-int noise_hashstate_new_by_id(NoiseHashState **state, int id);
-int noise_hashstate_new_by_name(NoiseHashState **state, const char *name);
-int noise_hashstate_free(NoiseHashState *state);
-int noise_hashstate_get_hash_id(const NoiseHashState *state);
+int    noise_hashstate_new_by_id(NoiseHashState **state, int id);
+int    noise_hashstate_new_by_name(NoiseHashState **state, const char *name);
+int    noise_hashstate_free(NoiseHashState *state);
+int    noise_hashstate_get_hash_id(const NoiseHashState *state);
 size_t noise_hashstate_get_hash_length(const NoiseHashState *state);
 size_t noise_hashstate_get_block_length(const NoiseHashState *state);
-int noise_hashstate_reset(NoiseHashState *state);
-int noise_hashstate_update
-    (NoiseHashState *state, const uint8_t *data, size_t data_len);
-int noise_hashstate_finalize
-    (NoiseHashState *state, uint8_t *hash, size_t hash_len);
-int noise_hashstate_hash_one
-    (NoiseHashState *state, const uint8_t *data, size_t data_len,
-     uint8_t *hash, size_t hash_len);
-int noise_hashstate_hash_two
-    (NoiseHashState *state, const uint8_t *data1, size_t data1_len,
-     const uint8_t *data2, size_t data2_len, uint8_t *hash, size_t hash_len);
-int noise_hashstate_hkdf
-    (NoiseHashState *state, const uint8_t *key, size_t key_len,
-     const uint8_t *data, size_t data_len,
-     uint8_t *output1, size_t output1_len,
-     uint8_t *output2, size_t output2_len);
-int noise_hashstate_pbkdf2
-    (NoiseHashState *state, const uint8_t *passphrase, size_t passphrase_len,
-     const uint8_t *salt, size_t salt_len, size_t iterations,
-     uint8_t *output, size_t output_len);
+int    noise_hashstate_reset(NoiseHashState *state);
+int noise_hashstate_update(NoiseHashState *state, const uint8_t *data, size_t data_len);
+int noise_hashstate_finalize(NoiseHashState *state, uint8_t *hash, size_t hash_len);
+int noise_hashstate_hash_one(NoiseHashState *state, const uint8_t *data, size_t data_len,
+                             uint8_t *hash, size_t hash_len);
+int noise_hashstate_hash_two(NoiseHashState *state, const uint8_t *data1,
+                             size_t data1_len, const uint8_t *data2, size_t data2_len,
+                             uint8_t *hash, size_t hash_len);
+int noise_hashstate_hkdf(NoiseHashState *state, const uint8_t *key, size_t key_len,
+                         const uint8_t *data, size_t data_len, uint8_t *output1,
+                         size_t output1_len, uint8_t *output2, size_t output2_len);
+int noise_hashstate_pbkdf2(NoiseHashState *state, const uint8_t *passphrase,
+                           size_t passphrase_len, const uint8_t *salt, size_t salt_len,
+                           size_t iterations, uint8_t *output, size_t output_len);
 int noise_hashstate_get_max_hash_length(void);
 int noise_hashstate_get_max_block_length(void);
 

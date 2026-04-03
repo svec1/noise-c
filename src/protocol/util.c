@@ -20,22 +20,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
+#include <openssl/sha.h>
+#include <stdlib.h>
 
 #include "internal.h"
-#if USE_LIBSODIUM
-#include <sodium.h>
-typedef crypto_hash_sha256_state sha256_context_t;
-#define sha256_reset(ctx) crypto_hash_sha256_init(ctx)
-#define sha256_update(ctx, pub, pub_len) crypto_hash_sha256_update(ctx, pub, pub_len)
-#define sha256_finish(ctx, hash) crypto_hash_sha256_final(ctx, hash)
-#else
-#include "crypto/sha2/sha256.h"
-#endif
-#if USE_OPENSSL
-#include <openssl/err.h>
-#include <openssl/evp.h>
-#endif
-#include <stdlib.h>
 #if HAVE_PTHREAD
 #include <pthread.h>
 static pthread_once_t noise_is_initialized = PTHREAD_ONCE_INIT;
@@ -51,8 +39,7 @@ static pthread_once_t noise_is_initialized = PTHREAD_ONCE_INIT;
  * \brief Utility function implementation
  */
 
-void noise_init_helper(void)
-{
+void noise_init_helper(void) {
 #if USE_LIBSODIUM
     if (sodium_init() < 0)
         return;
@@ -82,10 +69,10 @@ void noise_init_helper(void)
  * \return NOISE_ERROR_NONE on success.
  *
  * This will initialize the underlying crypto libraries.
- * You don't need to call this if you initialize the crypto libraries (eg. libsodium, OpenSSL) yourself.
+ * You don't need to call this if you initialize the crypto libraries (eg. libsodium,
+ * OpenSSL) yourself.
  */
-int noise_init(void)
-{
+int noise_init(void) {
 #if HAVE_PTHREAD
     if (pthread_once(&noise_is_initialized, noise_init_helper) != 0)
         return NOISE_ERROR_SYSTEM;
@@ -132,12 +119,11 @@ int noise_init(void)
  *
  * \sa noise_new(), noise_free()
  */
-void *noise_new_object(size_t size)
-{
+void *noise_new_object(size_t size) {
     void *ptr = calloc(1, size);
     if (!ptr || size < sizeof(size_t))
         return ptr;
-    *((size_t *)ptr) = size;
+    *((size_t *) ptr) = size;
     return ptr;
 }
 
@@ -149,8 +135,7 @@ void *noise_new_object(size_t size)
  *
  * \sa noise_new()
  */
-void noise_free(void *ptr, size_t size)
-{
+void noise_free(void *ptr, size_t size) {
     if (ptr) {
         noise_clean(ptr, size);
         free(ptr);
@@ -167,9 +152,8 @@ void noise_free(void *ptr, size_t size)
  * work around compilers and linkers that optimize away memset() calls
  * for memory that the compiler thinks is no longer live.
  */
-void noise_clean(void *data, size_t size)
-{
-    volatile uint8_t *d = (volatile uint8_t *)data;
+void noise_clean(void *data, size_t size) {
+    volatile uint8_t *d = (volatile uint8_t *) data;
     while (size > 0) {
         *d++ = 0;
         --size;
@@ -185,18 +169,17 @@ void noise_clean(void *data, size_t size)
  *
  * \return Returns 1 if the blocks are equal, 0 if they are not.
  */
-int noise_is_equal(const void *s1, const void *s2, size_t size)
-{
-    const uint8_t *str1 = (const unsigned char *)s1;
-    const uint8_t *str2 = (const unsigned char *)s2;
-    uint8_t temp = 0;
+int noise_is_equal(const void *s1, const void *s2, size_t size) {
+    const uint8_t *str1 = (const unsigned char *) s1;
+    const uint8_t *str2 = (const unsigned char *) s2;
+    uint8_t        temp = 0;
     while (size > 0) {
         temp |= *str1 ^ *str2;
         ++str1;
         ++str2;
         --size;
     }
-    return (0x0100 - (int)temp) >> 8;
+    return (0x0100 - (int) temp) >> 8;
 }
 
 /**
@@ -208,15 +191,14 @@ int noise_is_equal(const void *s1, const void *s2, size_t size)
  * \return Returns 1 if all bytes of \a data are zero, or 0 if any of the
  * bytes are non-zero.
  */
-int noise_is_zero(const void *data, size_t size)
-{
-    const uint8_t *d = (const uint8_t *)data;
-    uint8_t temp = 0;
+int noise_is_zero(const void *data, size_t size) {
+    const uint8_t *d    = (const uint8_t *) data;
+    uint8_t        temp = 0;
     while (size > 0) {
         temp |= *d++;
         --size;
     }
-    return (0x0100 - (int)temp) >> 8;
+    return (0x0100 - (int) temp) >> 8;
 }
 
 /**
@@ -242,15 +224,13 @@ int noise_is_zero(const void *data, size_t size)
  * noise_signstate_format_fingerprint(), or noise_keystate_format_fingerprint()
  * instead.
  */
-int noise_format_fingerprint
-    (int fingerprint_type, char *buffer, size_t len,
-     const uint8_t *public_key, size_t public_key_len)
-{
+int noise_format_fingerprint(int fingerprint_type, char *buffer, size_t len,
+                             const uint8_t *public_key, size_t public_key_len) {
     static char const hexchars[] = "0123456789abcdef";
-    sha256_context_t sha256;
-    uint8_t hash[32];
-    size_t f_len;
-    size_t posn;
+    SHA256_CTX        sha256;
+    uint8_t           hash[32];
+    size_t            f_len;
+    size_t            posn;
 
     /* Validate the parameters */
     if (!buffer)
@@ -274,15 +254,15 @@ int noise_format_fingerprint
         return NOISE_ERROR_INVALID_LENGTH;
 
     /* Hash the public key with SHA256 */
-    sha256_reset(&sha256);
-    sha256_update(&sha256, public_key, public_key_len);
-    sha256_finish(&sha256, hash);
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, public_key, public_key_len);
+    SHA256_Final(hash, &sha256);
     noise_clean(&sha256, sizeof(sha256));
 
     /* Format the fingerprint in hexadecimal within the buffer */
     for (posn = 0; posn < f_len; ++posn) {
-        uint8_t byte = hash[posn];
-        buffer[posn * 3] = hexchars[(byte >> 4) & 0x0F];
+        uint8_t byte         = hash[posn];
+        buffer[posn * 3]     = hexchars[(byte >> 4) & 0x0F];
         buffer[posn * 3 + 1] = hexchars[byte & 0x0F];
         buffer[posn * 3 + 2] = ':';
     }

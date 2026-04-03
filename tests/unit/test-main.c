@@ -22,14 +22,13 @@
 
 #include "test-helpers.h"
 
-int test_count = 0;
-int test_failures = 0;
-jmp_buf test_jump_back;
+int         test_count    = 0;
+int         test_failures = 0;
+jmp_buf     test_jump_back;
 const char *data_name = 0;
-int verbose = 0;
+int         verbose   = 0;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     /* Parse the command-line arguments */
     if (argc > 1 && !strcmp(argv[1], "--verbose"))
         verbose = 1;
@@ -47,9 +46,7 @@ int main(int argc, char *argv[])
     test(hashstate);
     test(names);
     test(patterns);
-    test(protobufs);
     test(randstate);
-    test(signstate);
     test(symmetricstate);
 
     /* Report the results */
@@ -61,8 +58,7 @@ int main(int argc, char *argv[])
     return test_failures ? 1 : 0;
 }
 
-static int from_hex(char ch)
-{
+static int from_hex(char ch) {
     if (ch >= '0' && ch <= '9')
         return ch - '0';
     else if (ch >= 'A' && ch <= 'F')
@@ -73,8 +69,7 @@ static int from_hex(char ch)
     return 0;
 }
 
-size_t string_to_data(uint8_t *data, size_t max_len, const char *str)
-{
+size_t string_to_data(uint8_t *data, size_t max_len, const char *str) {
     size_t len;
     if (str[0] == '0' && str[1] == 'x') {
         /* Hexadecimal string */
@@ -101,8 +96,7 @@ size_t string_to_data(uint8_t *data, size_t max_len, const char *str)
     }
 }
 
-void print_block(const char *tag, const uint8_t *data, size_t size)
-{
+void print_block(const char *tag, const uint8_t *data, size_t size) {
     printf("%s:", tag);
     while (size > 0) {
         printf(" %02x", *data);

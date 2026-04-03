@@ -22,32 +22,32 @@
 
 #include "echo-common.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #if defined(__WIN32__) || defined(WIN32)
 #include <winsock2.h>
 #include <ws2tcpip.h>
-typedef int socklen_t;
+typedef int  socklen_t;
 typedef BOOL sockopt_type;
 #define MSG_NOSIGNAL 0
 #undef HAVE_POLL
 #else
-#include <unistd.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/wait.h>
-#include <netinet/ip.h>
-#include <netinet/ip6.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip6.h>
+#include <netinet/tcp.h>
+#include <signal.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #if HAVE_POLL
 #include <poll.h>
 #endif
 #include <errno.h>
-#define closesocket(x)  close((x))
+#define closesocket(x) close((x))
 typedef int sockopt_type;
 #endif
 
@@ -60,160 +60,318 @@ typedef int sockopt_type;
 int echo_verbose = 0;
 
 /* Convert a Noise handshake protocol name into an Echo protocol id */
-int echo_get_protocol_id(EchoProtocolId *id, const char *name)
-{
+int echo_get_protocol_id(EchoProtocolId *id, const char *name) {
     NoiseProtocolId nid;
-    int ok = 1;
+    int             ok = 1;
 
     memset(id, 0, sizeof(EchoProtocolId));
     if (noise_protocol_name_to_id(&nid, name, strlen(name)) != NOISE_ERROR_NONE)
         return 0;
 
     switch (nid.prefix_id) {
-    case NOISE_PREFIX_STANDARD:     id->psk = ECHO_PSK_DISABLED; break;
-    case NOISE_PREFIX_PSK:          id->psk = ECHO_PSK_ENABLED; break;
-    default:                        ok = 0; break;
+        case NOISE_PREFIX_STANDARD:
+            id->psk = ECHO_PSK_DISABLED;
+            break;
+        case NOISE_PREFIX_PSK:
+            id->psk = ECHO_PSK_ENABLED;
+            break;
+        default:
+            ok = 0;
+            break;
     }
 
     switch (nid.pattern_id) {
-    case NOISE_PATTERN_NN:          id->pattern = ECHO_PATTERN_NN; break;
-    case NOISE_PATTERN_KN:          id->pattern = ECHO_PATTERN_KN; break;
-    case NOISE_PATTERN_NK:          id->pattern = ECHO_PATTERN_NK; break;
-    case NOISE_PATTERN_KK:          id->pattern = ECHO_PATTERN_KK; break;
-    case NOISE_PATTERN_NX:          id->pattern = ECHO_PATTERN_NX; break;
-    case NOISE_PATTERN_KX:          id->pattern = ECHO_PATTERN_KX; break;
-    case NOISE_PATTERN_XN:          id->pattern = ECHO_PATTERN_XN; break;
-    case NOISE_PATTERN_IN:          id->pattern = ECHO_PATTERN_IN; break;
-    case NOISE_PATTERN_XK:          id->pattern = ECHO_PATTERN_XK; break;
-    case NOISE_PATTERN_IK:          id->pattern = ECHO_PATTERN_IK; break;
-    case NOISE_PATTERN_XX:          id->pattern = ECHO_PATTERN_XX; break;
-    case NOISE_PATTERN_IX:          id->pattern = ECHO_PATTERN_IX; break;
-    case NOISE_PATTERN_NN_HFS:      id->pattern = ECHO_PATTERN_NN | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_KN_HFS:      id->pattern = ECHO_PATTERN_KN | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_NK_HFS:      id->pattern = ECHO_PATTERN_NK | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_KK_HFS:      id->pattern = ECHO_PATTERN_KK | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_NX_HFS:      id->pattern = ECHO_PATTERN_NX | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_KX_HFS:      id->pattern = ECHO_PATTERN_KX | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_XN_HFS:      id->pattern = ECHO_PATTERN_XN | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_IN_HFS:      id->pattern = ECHO_PATTERN_IN | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_XK_HFS:      id->pattern = ECHO_PATTERN_XK | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_IK_HFS:      id->pattern = ECHO_PATTERN_IK | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_XX_HFS:      id->pattern = ECHO_PATTERN_XX | ECHO_PATTERN_HFS; break;
-    case NOISE_PATTERN_IX_HFS:      id->pattern = ECHO_PATTERN_IX | ECHO_PATTERN_HFS; break;
-    default:                        ok = 0; break;
+        case NOISE_PATTERN_NN:
+            id->pattern = ECHO_PATTERN_NN;
+            break;
+        case NOISE_PATTERN_KN:
+            id->pattern = ECHO_PATTERN_KN;
+            break;
+        case NOISE_PATTERN_NK:
+            id->pattern = ECHO_PATTERN_NK;
+            break;
+        case NOISE_PATTERN_KK:
+            id->pattern = ECHO_PATTERN_KK;
+            break;
+        case NOISE_PATTERN_NX:
+            id->pattern = ECHO_PATTERN_NX;
+            break;
+        case NOISE_PATTERN_KX:
+            id->pattern = ECHO_PATTERN_KX;
+            break;
+        case NOISE_PATTERN_XN:
+            id->pattern = ECHO_PATTERN_XN;
+            break;
+        case NOISE_PATTERN_IN:
+            id->pattern = ECHO_PATTERN_IN;
+            break;
+        case NOISE_PATTERN_XK:
+            id->pattern = ECHO_PATTERN_XK;
+            break;
+        case NOISE_PATTERN_IK:
+            id->pattern = ECHO_PATTERN_IK;
+            break;
+        case NOISE_PATTERN_XX:
+            id->pattern = ECHO_PATTERN_XX;
+            break;
+        case NOISE_PATTERN_IX:
+            id->pattern = ECHO_PATTERN_IX;
+            break;
+        case NOISE_PATTERN_NN_HFS:
+            id->pattern = ECHO_PATTERN_NN | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_KN_HFS:
+            id->pattern = ECHO_PATTERN_KN | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_NK_HFS:
+            id->pattern = ECHO_PATTERN_NK | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_KK_HFS:
+            id->pattern = ECHO_PATTERN_KK | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_NX_HFS:
+            id->pattern = ECHO_PATTERN_NX | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_KX_HFS:
+            id->pattern = ECHO_PATTERN_KX | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_XN_HFS:
+            id->pattern = ECHO_PATTERN_XN | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_IN_HFS:
+            id->pattern = ECHO_PATTERN_IN | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_XK_HFS:
+            id->pattern = ECHO_PATTERN_XK | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_IK_HFS:
+            id->pattern = ECHO_PATTERN_IK | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_XX_HFS:
+            id->pattern = ECHO_PATTERN_XX | ECHO_PATTERN_HFS;
+            break;
+        case NOISE_PATTERN_IX_HFS:
+            id->pattern = ECHO_PATTERN_IX | ECHO_PATTERN_HFS;
+            break;
+        default:
+            ok = 0;
+            break;
     }
 
     switch (nid.cipher_id) {
-    case NOISE_CIPHER_CHACHAPOLY:   id->cipher = ECHO_CIPHER_CHACHAPOLY; break;
-    case NOISE_CIPHER_AESGCM:       id->cipher = ECHO_CIPHER_AESGCM; break;
-    default:                        ok = 0; break;
+        case NOISE_CIPHER_CHACHAPOLY:
+            id->cipher = ECHO_CIPHER_CHACHAPOLY;
+            break;
+        case NOISE_CIPHER_AESGCM:
+            id->cipher = ECHO_CIPHER_AESGCM;
+            break;
+        default:
+            ok = 0;
+            break;
     }
 
     switch (nid.dh_id) {
-    case NOISE_DH_CURVE25519:       id->dh = ECHO_DH_25519; break;
-    case NOISE_DH_CURVE448:         id->dh = ECHO_DH_448; break;
-    case NOISE_DH_KYBER1024:        id->dh = ECHO_DH_KYBER1024; break;
-    default:                        ok = 0; break;
+        case NOISE_DH_CURVE25519:
+            id->dh = ECHO_DH_25519;
+            break;
+        case NOISE_DH_KYBER1024:
+            id->dh = ECHO_DH_KYBER1024;
+            break;
+        default:
+            ok = 0;
+            break;
     }
 
     switch (nid.hybrid_id) {
-    case NOISE_DH_CURVE25519:       id->dh |= ECHO_HYBRID_25519; break;
-    case NOISE_DH_CURVE448:         id->dh |= ECHO_HYBRID_448; break;
-    case NOISE_DH_KYBER1024:        id->dh |= ECHO_HYBRID_KYBER1024; break;
-    case NOISE_DH_NONE:             break;
-    default:                        ok = 0; break;
+        case NOISE_DH_CURVE25519:
+            id->dh |= ECHO_HYBRID_25519;
+            break;
+        case NOISE_DH_KYBER1024:
+            id->dh |= ECHO_HYBRID_KYBER1024;
+            break;
+        case NOISE_DH_NONE:
+            break;
+        default:
+            ok = 0;
+            break;
     }
 
     switch (nid.hash_id) {
-    case NOISE_HASH_SHA256:         id->hash = ECHO_HASH_SHA256; break;
-    case NOISE_HASH_SHA512:         id->hash = ECHO_HASH_SHA512; break;
-    case NOISE_HASH_BLAKE2s:        id->hash = ECHO_HASH_BLAKE2s; break;
-    case NOISE_HASH_BLAKE2b:        id->hash = ECHO_HASH_BLAKE2b; break;
-    default:                        ok = 0; break;
+        case NOISE_HASH_SHA256:
+            id->hash = ECHO_HASH_SHA256;
+            break;
+        case NOISE_HASH_SHA512:
+            id->hash = ECHO_HASH_SHA512;
+            break;
+        case NOISE_HASH_BLAKE2s:
+            id->hash = ECHO_HASH_BLAKE2s;
+            break;
+        case NOISE_HASH_BLAKE2b:
+            id->hash = ECHO_HASH_BLAKE2b;
+            break;
+        default:
+            ok = 0;
+            break;
     }
 
     return ok;
 }
 
 /* Convert an Echo protocol id into a Noise protocol id */
-int echo_to_noise_protocol_id(NoiseProtocolId *nid, const EchoProtocolId *id)
-{
+int echo_to_noise_protocol_id(NoiseProtocolId *nid, const EchoProtocolId *id) {
     int ok = 1;
 
     memset(nid, 0, sizeof(NoiseProtocolId));
 
     switch (id->psk) {
-    case ECHO_PSK_DISABLED:         nid->prefix_id = NOISE_PREFIX_STANDARD; break;
-    case ECHO_PSK_ENABLED:          nid->prefix_id = NOISE_PREFIX_PSK; break;
-    default:                        ok = 0;
+        case ECHO_PSK_DISABLED:
+            nid->prefix_id = NOISE_PREFIX_STANDARD;
+            break;
+        case ECHO_PSK_ENABLED:
+            nid->prefix_id = NOISE_PREFIX_PSK;
+            break;
+        default:
+            ok = 0;
     }
 
     switch (id->pattern) {
-    case ECHO_PATTERN_NN:           nid->pattern_id = NOISE_PATTERN_NN; break;
-    case ECHO_PATTERN_KN:           nid->pattern_id = NOISE_PATTERN_KN; break;
-    case ECHO_PATTERN_NK:           nid->pattern_id = NOISE_PATTERN_NK; break;
-    case ECHO_PATTERN_KK:           nid->pattern_id = NOISE_PATTERN_KK; break;
-    case ECHO_PATTERN_NX:           nid->pattern_id = NOISE_PATTERN_NX; break;
-    case ECHO_PATTERN_KX:           nid->pattern_id = NOISE_PATTERN_KX; break;
-    case ECHO_PATTERN_XN:           nid->pattern_id = NOISE_PATTERN_XN; break;
-    case ECHO_PATTERN_IN:           nid->pattern_id = NOISE_PATTERN_IN; break;
-    case ECHO_PATTERN_XK:           nid->pattern_id = NOISE_PATTERN_XK; break;
-    case ECHO_PATTERN_IK:           nid->pattern_id = NOISE_PATTERN_IK; break;
-    case ECHO_PATTERN_XX:           nid->pattern_id = NOISE_PATTERN_XX; break;
-    case ECHO_PATTERN_IX:           nid->pattern_id = NOISE_PATTERN_IX; break;
-    case ECHO_PATTERN_NN | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_NN_HFS; break;
-    case ECHO_PATTERN_KN | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_KN_HFS; break;
-    case ECHO_PATTERN_NK | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_NK_HFS; break;
-    case ECHO_PATTERN_KK | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_KK_HFS; break;
-    case ECHO_PATTERN_NX | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_NX_HFS; break;
-    case ECHO_PATTERN_KX | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_KX_HFS; break;
-    case ECHO_PATTERN_XN | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_XN_HFS; break;
-    case ECHO_PATTERN_IN | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_IN_HFS; break;
-    case ECHO_PATTERN_XK | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_XK_HFS; break;
-    case ECHO_PATTERN_IK | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_IK_HFS; break;
-    case ECHO_PATTERN_XX | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_XX_HFS; break;
-    case ECHO_PATTERN_IX | ECHO_PATTERN_HFS:    nid->pattern_id = NOISE_PATTERN_IX_HFS; break;
-    default:                        ok = 0;
+        case ECHO_PATTERN_NN:
+            nid->pattern_id = NOISE_PATTERN_NN;
+            break;
+        case ECHO_PATTERN_KN:
+            nid->pattern_id = NOISE_PATTERN_KN;
+            break;
+        case ECHO_PATTERN_NK:
+            nid->pattern_id = NOISE_PATTERN_NK;
+            break;
+        case ECHO_PATTERN_KK:
+            nid->pattern_id = NOISE_PATTERN_KK;
+            break;
+        case ECHO_PATTERN_NX:
+            nid->pattern_id = NOISE_PATTERN_NX;
+            break;
+        case ECHO_PATTERN_KX:
+            nid->pattern_id = NOISE_PATTERN_KX;
+            break;
+        case ECHO_PATTERN_XN:
+            nid->pattern_id = NOISE_PATTERN_XN;
+            break;
+        case ECHO_PATTERN_IN:
+            nid->pattern_id = NOISE_PATTERN_IN;
+            break;
+        case ECHO_PATTERN_XK:
+            nid->pattern_id = NOISE_PATTERN_XK;
+            break;
+        case ECHO_PATTERN_IK:
+            nid->pattern_id = NOISE_PATTERN_IK;
+            break;
+        case ECHO_PATTERN_XX:
+            nid->pattern_id = NOISE_PATTERN_XX;
+            break;
+        case ECHO_PATTERN_IX:
+            nid->pattern_id = NOISE_PATTERN_IX;
+            break;
+        case ECHO_PATTERN_NN | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_NN_HFS;
+            break;
+        case ECHO_PATTERN_KN | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_KN_HFS;
+            break;
+        case ECHO_PATTERN_NK | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_NK_HFS;
+            break;
+        case ECHO_PATTERN_KK | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_KK_HFS;
+            break;
+        case ECHO_PATTERN_NX | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_NX_HFS;
+            break;
+        case ECHO_PATTERN_KX | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_KX_HFS;
+            break;
+        case ECHO_PATTERN_XN | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_XN_HFS;
+            break;
+        case ECHO_PATTERN_IN | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_IN_HFS;
+            break;
+        case ECHO_PATTERN_XK | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_XK_HFS;
+            break;
+        case ECHO_PATTERN_IK | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_IK_HFS;
+            break;
+        case ECHO_PATTERN_XX | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_XX_HFS;
+            break;
+        case ECHO_PATTERN_IX | ECHO_PATTERN_HFS:
+            nid->pattern_id = NOISE_PATTERN_IX_HFS;
+            break;
+        default:
+            ok = 0;
     }
 
     switch (id->cipher) {
-    case ECHO_CIPHER_CHACHAPOLY:    nid->cipher_id = NOISE_CIPHER_CHACHAPOLY; break;
-    case ECHO_CIPHER_AESGCM:        nid->cipher_id = NOISE_CIPHER_AESGCM; break;
-    default:                        ok = 0;
+        case ECHO_CIPHER_CHACHAPOLY:
+            nid->cipher_id = NOISE_CIPHER_CHACHAPOLY;
+            break;
+        case ECHO_CIPHER_AESGCM:
+            nid->cipher_id = NOISE_CIPHER_AESGCM;
+            break;
+        default:
+            ok = 0;
     }
 
     switch (id->dh & ECHO_DH_MASK) {
-    case ECHO_DH_25519:             nid->dh_id = NOISE_DH_CURVE25519; break;
-    case ECHO_DH_448:               nid->dh_id = NOISE_DH_CURVE448; break;
-    case ECHO_DH_KYBER1024:         nid->dh_id = NOISE_DH_KYBER1024; break;
-    default:                        ok = 0;
+        case ECHO_DH_25519:
+            nid->dh_id = NOISE_DH_CURVE25519;
+            break;
+        case ECHO_DH_KYBER1024:
+            nid->dh_id = NOISE_DH_KYBER1024;
+            break;
+        default:
+            ok = 0;
     }
 
     switch (id->dh & ECHO_HYBRID_MASK) {
-    case ECHO_HYBRID_25519:         nid->hybrid_id = NOISE_DH_CURVE25519; break;
-    case ECHO_HYBRID_448:           nid->hybrid_id = NOISE_DH_CURVE448; break;
-    case ECHO_HYBRID_KYBER1024:     nid->hybrid_id = NOISE_DH_KYBER1024; break;
-    case ECHO_HYBRID_NONE:          nid->hybrid_id = NOISE_DH_NONE; break;
-    default:                        ok = 0;
+        case ECHO_HYBRID_25519:
+            nid->hybrid_id = NOISE_DH_CURVE25519;
+            break;
+        case ECHO_HYBRID_KYBER1024:
+            nid->hybrid_id = NOISE_DH_KYBER1024;
+            break;
+        case ECHO_HYBRID_NONE:
+            nid->hybrid_id = NOISE_DH_NONE;
+            break;
+        default:
+            ok = 0;
     }
 
     switch (id->hash) {
-    case ECHO_HASH_SHA256:          nid->hash_id = NOISE_HASH_SHA256; break;
-    case ECHO_HASH_SHA512:          nid->hash_id = NOISE_HASH_SHA512; break;
-    case ECHO_HASH_BLAKE2s:         nid->hash_id = NOISE_HASH_BLAKE2s; break;
-    case ECHO_HASH_BLAKE2b:         nid->hash_id = NOISE_HASH_BLAKE2b; break;
-    default:                        ok = 0;
+        case ECHO_HASH_SHA256:
+            nid->hash_id = NOISE_HASH_SHA256;
+            break;
+        case ECHO_HASH_SHA512:
+            nid->hash_id = NOISE_HASH_SHA512;
+            break;
+        case ECHO_HASH_BLAKE2s:
+            nid->hash_id = NOISE_HASH_BLAKE2s;
+            break;
+        case ECHO_HASH_BLAKE2b:
+            nid->hash_id = NOISE_HASH_BLAKE2b;
+            break;
+        default:
+            ok = 0;
     }
 
     return ok;
 }
 
 /* Loads a binary private key from a file.  Returns non-zero if OK. */
-int echo_load_private_key(const char *filename, uint8_t *key, size_t len)
-{
-    FILE *file = fopen(filename, "rb");
+int echo_load_private_key(const char *filename, uint8_t *key, size_t len) {
+    FILE  *file = fopen(filename, "rb");
     size_t posn = 0;
-    int ch;
+    int    ch;
     if (len > MAX_DH_KEY_LEN) {
         fprintf(stderr, "private key length is not supported\n");
         return 0;
@@ -228,7 +386,7 @@ int echo_load_private_key(const char *filename, uint8_t *key, size_t len)
             fprintf(stderr, "%s: private key value is too long\n", filename);
             return 0;
         }
-        key[posn++] = (uint8_t)ch;
+        key[posn++] = (uint8_t) ch;
     }
     if (posn < len) {
         fclose(file);
@@ -240,14 +398,13 @@ int echo_load_private_key(const char *filename, uint8_t *key, size_t len)
 }
 
 /* Loads a base64-encoded public key from a file.  Returns non-zero if OK. */
-int echo_load_public_key(const char *filename, uint8_t *key, size_t len)
-{
-    FILE *file = fopen(filename, "rb");
-    uint32_t group = 0;
-    size_t group_size = 0;
-    uint32_t digit = 0;
-    size_t posn = 0;
-    int ch;
+int echo_load_public_key(const char *filename, uint8_t *key, size_t len) {
+    FILE    *file       = fopen(filename, "rb");
+    uint32_t group      = 0;
+    size_t   group_size = 0;
+    uint32_t digit      = 0;
+    size_t   posn       = 0;
+    int      ch;
     if (len > MAX_DH_KEY_LEN) {
         fprintf(stderr, "public key length is not supported\n");
         return 0;
@@ -281,10 +438,10 @@ int echo_load_public_key(const char *filename, uint8_t *key, size_t len)
                 fprintf(stderr, "%s: public key value is too long\n", filename);
                 return 0;
             }
-            group_size = 0;
-            key[posn++] = (uint8_t)(group >> 16);
-            key[posn++] = (uint8_t)(group >> 8);
-            key[posn++] = (uint8_t)group;
+            group_size  = 0;
+            key[posn++] = (uint8_t) (group >> 16);
+            key[posn++] = (uint8_t) (group >> 8);
+            key[posn++] = (uint8_t) group;
         }
     }
     if (group_size == 3) {
@@ -293,15 +450,15 @@ int echo_load_public_key(const char *filename, uint8_t *key, size_t len)
             fprintf(stderr, "%s: public key value is too long\n", filename);
             return 0;
         }
-        key[posn++] = (uint8_t)(group >> 10);
-        key[posn++] = (uint8_t)(group >> 2);
+        key[posn++] = (uint8_t) (group >> 10);
+        key[posn++] = (uint8_t) (group >> 2);
     } else if (group_size == 2) {
         if ((len - posn) < 1) {
             fclose(file);
             fprintf(stderr, "%s: public key value is too long\n", filename);
             return 0;
         }
-        key[posn++] = (uint8_t)(group >> 4);
+        key[posn++] = (uint8_t) (group >> 4);
     }
     if (posn < len) {
         fclose(file);
@@ -314,21 +471,20 @@ int echo_load_public_key(const char *filename, uint8_t *key, size_t len)
 
 /* Connects to a remote echo server.  Returns the file descriptor or -1
    if an error occurs while creating the socket or trying to connect. */
-int echo_connect(const char *hostname, int port)
-{
-    struct addrinfo hints;
+int echo_connect(const char *hostname, int port) {
+    struct addrinfo  hints;
     struct addrinfo *result = 0;
     struct addrinfo *current;
-    int fd, err;
-    sockopt_type opt;
-    char service[64];
+    int              fd, err;
+    sockopt_type     opt;
+    char             service[64];
 
     /* Look up the address of the remote party */
     snprintf(service, sizeof(service), "%d", port);
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family   = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    err = getaddrinfo(hostname, service, &hints, &result);
+    err               = getaddrinfo(hostname, service, &hints, &result);
     if (err != 0) {
         fprintf(stderr, "%s: %s\n", hostname, gai_strerror(err));
         return -1;
@@ -337,13 +493,12 @@ int echo_connect(const char *hostname, int port)
     /* Try each of the return addresses in turn until one connects */
     for (current = result; current != 0; current = current->ai_next) {
         /* Create the socket and set some useful options on it */
-        fd = socket(current->ai_family, current->ai_socktype,
-                    current->ai_protocol);
+        fd = socket(current->ai_family, current->ai_socktype, current->ai_protocol);
         if (fd < 0)
             continue;
         opt = 1;
-        if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
-                       (const void *)&opt, sizeof(opt)) < 0) {
+        if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (const void *) &opt, sizeof(opt))
+            < 0) {
             perror("setsockopt TCP_NODELAY");
             closesocket(fd);
             freeaddrinfo(result);
@@ -370,8 +525,7 @@ int echo_connect(const char *hostname, int port)
 
 #if !(defined(__WIN32__) || defined(WIN32))
 
-static void sigchld_handler(int sig)
-{
+static void sigchld_handler(int sig) {
     /* Nothing to do here */
 }
 
@@ -386,23 +540,22 @@ static void sigchld_handler(int sig)
    Internally this function will fork the process and return the file
    descriptor for the connection in the child.  The parent process will
    never return from this function. */
-int echo_accept(int port)
-{
-    struct addrinfo hints;
+int echo_accept(int port) {
+    struct addrinfo  hints;
     struct addrinfo *result = 0;
     struct addrinfo *current;
 #if HAVE_POLL
     struct pollfd poll_fd[MAX_LISTEN];
 #endif
-    int listen_fd[MAX_LISTEN];
-    int num_listen = 0;
-    int fd, accept_fd;
-    int err, index;
-    sockopt_type opt;
+    int                     listen_fd[MAX_LISTEN];
+    int                     num_listen = 0;
+    int                     fd, accept_fd;
+    int                     err, index;
+    sockopt_type            opt;
     struct sockaddr_storage addr;
-    socklen_t addrlen;
-    char service[64];
-    int seenIPV4 = 0;
+    socklen_t               addrlen;
+    char                    service[64];
+    int                     seenIPV4 = 0;
 
 #if !(defined(__WIN32__) || defined(WIN32))
     /* We will need SIGCHLD signals to clean up child processes */
@@ -412,27 +565,25 @@ int echo_accept(int port)
     /* Ask getaddrinfo() for a list of socket addresses to bind to */
     snprintf(service, sizeof(service), "%d", port);
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family   = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    err = getaddrinfo(NULL, service, &hints, &result);
+    hints.ai_flags    = AI_PASSIVE;
+    err               = getaddrinfo(NULL, service, &hints, &result);
     if (err != 0) {
-        fprintf(stderr, "Could not find an address to bind to: %s\n",
-                gai_strerror(err));
+        fprintf(stderr, "Could not find an address to bind to: %s\n", gai_strerror(err));
         exit(1);
     }
 
     /* Bind to all addresses we can */
     memset(listen_fd, 0, sizeof(listen_fd));
     for (current = result; current != 0 && num_listen < MAX_LISTEN;
-            current = current->ai_next) {
-        fd = socket(current->ai_family, current->ai_socktype,
-                    current->ai_protocol);
+         current = current->ai_next) {
+        fd = socket(current->ai_family, current->ai_socktype, current->ai_protocol);
         if (fd < 0)
             continue;
         opt = 1;
-        if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-                       (const void *)&opt, sizeof(opt)) < 0) {
+        if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (const void *) &opt, sizeof(opt))
+            < 0) {
             perror("setsockopt SO_REUSEADDR");
             closesocket(fd);
             exit(1);
@@ -445,8 +596,7 @@ int echo_accept(int port)
                Set the IPv6-only option or the second bind
                attempt may fail.  If the option doesn't work,
                then let the second bind fail below anyway. */
-            setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
-                       (const void *)&opt, sizeof(opt));
+            setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, (const void *) &opt, sizeof(opt));
         }
 #endif
         if (bind(fd, current->ai_addr, current->ai_addrlen) < 0) {
@@ -460,8 +610,8 @@ int echo_accept(int port)
         }
         listen_fd[num_listen] = fd;
 #if HAVE_POLL
-        poll_fd[num_listen].fd = fd;
-        poll_fd[num_listen].events = POLLIN;
+        poll_fd[num_listen].fd      = fd;
+        poll_fd[num_listen].events  = POLLIN;
         poll_fd[num_listen].revents = 0;
 #endif
         ++num_listen;
@@ -488,7 +638,7 @@ int echo_accept(int port)
                    child process terminating.  Clean up any waiting children. */
                 int status;
                 while (waitpid(-1, &status, WNOHANG) >= 0)
-                    ;   /* Do nothing */
+                    ; /* Do nothing */
                 continue;
             }
             perror("poll");
@@ -505,7 +655,7 @@ int echo_accept(int port)
             continue;
 #else
         fd_set read_set;
-        int nfds = 0;
+        int    nfds = 0;
         FD_ZERO(&read_set);
         for (index = 0; index < num_listen; ++index) {
             FD_SET(listen_fd[index], &read_set);
@@ -528,8 +678,8 @@ int echo_accept(int port)
 
         /* Accept the incoming connection */
         memset(&addr, 0, sizeof(addr));
-        addrlen = sizeof(addr);
-        accept_fd = accept(fd, (struct sockaddr *)&addr, &addrlen);
+        addrlen   = sizeof(addr);
+        accept_fd = accept(fd, (struct sockaddr *) &addr, &addrlen);
 #if defined(__WIN32__) || defined(WIN32)
         if (accept_fd >= 0) {
             /* Win32 doesn't have a direct equivalent to fork so merely
@@ -564,7 +714,7 @@ int echo_accept(int port)
                child process terminating.  Clean up any waiting children. */
             int status;
             while (waitpid(-1, &status, WNOHANG) >= 0)
-                ;   /* Do nothing */
+                ; /* Do nothing */
         } else {
             perror("accept");
             for (index = 0; index < num_listen; ++index)
@@ -576,7 +726,8 @@ int echo_accept(int port)
 
     /* Add some useful options to the incoming socket and then return */
     opt = 1;
-    if (setsockopt(accept_fd, IPPROTO_TCP, TCP_NODELAY, (const void *)&opt, sizeof(opt)) < 0) {
+    if (setsockopt(accept_fd, IPPROTO_TCP, TCP_NODELAY, (const void *) &opt, sizeof(opt))
+        < 0) {
         perror("setsockopt TCP_NODELAY");
         closesocket(accept_fd);
         exit(1);
@@ -584,8 +735,7 @@ int echo_accept(int port)
     return accept_fd;
 }
 
-static void echo_print_packet(const char *tag, const uint8_t *packet, size_t len)
-{
+static void echo_print_packet(const char *tag, const uint8_t *packet, size_t len) {
     size_t index;
     printf("%s:", tag);
     for (index = 0; index < len; ++index) {
@@ -598,11 +748,10 @@ static void echo_print_packet(const char *tag, const uint8_t *packet, size_t len
 
 /* Receives an exact number of bytes, blocking until they are all available.
    Returns non-zero if OK, zero if the connection has been lost. */
-static int echo_recv_exact_internal(int fd, uint8_t *packet, size_t len)
-{
+static int echo_recv_exact_internal(int fd, uint8_t *packet, size_t len) {
     size_t received = 0;
     while (len > 0) {
-        int size = recv(fd, (void *)packet, len, 0);
+        int size = recv(fd, (void *) packet, len, 0);
         if (size < 0) {
 #if defined(__WIN32__) || defined(WIN32)
             return 0;
@@ -625,8 +774,7 @@ static int echo_recv_exact_internal(int fd, uint8_t *packet, size_t len)
 
 /* Receives an exact number of bytes, blocking until they are all available.
    Returns non-zero if OK, zero if the connection has been lost. */
-int echo_recv_exact(int fd, uint8_t *packet, size_t len)
-{
+int echo_recv_exact(int fd, uint8_t *packet, size_t len) {
     size_t received = echo_recv_exact_internal(fd, packet, len);
     if (received) {
         if (echo_verbose)
@@ -640,14 +788,13 @@ int echo_recv_exact(int fd, uint8_t *packet, size_t len)
 /* Receives a complete Noise packet, including the two-byte length prefix.
    Returns the length of the packet, zero if the connection has been lost
    or the packet is too large for the supplied buffer. */
-size_t echo_recv(int fd, uint8_t *packet, size_t max_len)
-{
+size_t echo_recv(int fd, uint8_t *packet, size_t max_len) {
     size_t size;
     if (max_len < 2)
         return 0;
     if (!echo_recv_exact_internal(fd, packet, 2))
         return 0;
-    size = (((size_t)(packet[0])) << 8) | ((size_t)(packet[1]));
+    size = (((size_t) (packet[0])) << 8) | ((size_t) (packet[1]));
     if (size > (max_len - 2))
         return 0;
     size = echo_recv_exact_internal(fd, packet + 2, size);
@@ -660,12 +807,11 @@ size_t echo_recv(int fd, uint8_t *packet, size_t max_len)
 
 /* Sends a complete Noise packet, including the two-byte length prefix.
    Returns non-zero if OK, zero if the connection has been lost. */
-int echo_send(int fd, const uint8_t *packet, size_t len)
-{
+int echo_send(int fd, const uint8_t *packet, size_t len) {
     int size;
     if (echo_verbose)
         echo_print_packet("Tx", packet, len);
-    while ((size = send(fd, (const void *)packet, len, MSG_NOSIGNAL)) != (int)len) {
+    while ((size = send(fd, (const void *) packet, len, MSG_NOSIGNAL)) != (int) len) {
         if (size < 0) {
 #if defined(__WIN32__) || defined(WIN32)
             return 0;
@@ -688,7 +834,6 @@ int echo_send(int fd, const uint8_t *packet, size_t len)
 }
 
 /* Closes a socket */
-void echo_close(int fd)
-{
+void echo_close(int fd) {
     closesocket(fd);
 }

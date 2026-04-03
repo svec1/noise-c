@@ -55,20 +55,19 @@
  * This is the internal implementation of noise_symmetricstate_new_by_id()
  * and noise_symmetricstate_new_by_name().
  */
-static int noise_symmetricstate_new
-    (NoiseSymmetricState **state, const char *name, const NoiseProtocolId *id)
-{
+static int noise_symmetricstate_new(NoiseSymmetricState **state, const char *name,
+                                    const NoiseProtocolId *id) {
     NoiseSymmetricState *new_state;
-    size_t name_len;
-    size_t hash_len;
-    int err;
+    size_t               name_len;
+    size_t               hash_len;
+    int                  err;
 
     /* Construct a state object and initialize it */
     new_state = noise_new(NoiseSymmetricState);
     if (!new_state)
         return NOISE_ERROR_NO_MEMORY;
     new_state->id = *id;
-    err = noise_cipherstate_new_by_id(&(new_state->cipher), id->cipher_id);
+    err           = noise_cipherstate_new_by_id(&(new_state->cipher), id->cipher_id);
     if (err != NOISE_ERROR_NONE) {
         noise_symmetricstate_free(new_state);
         return err;
@@ -101,9 +100,8 @@ static int noise_symmetricstate_new
         memcpy(new_state->h, name, name_len);
         memset(new_state->h + name_len, 0, hash_len - name_len);
     } else {
-        noise_hashstate_hash_one
-            (new_state->hash, (const uint8_t *)name, name_len,
-             new_state->h, hash_len);
+        noise_hashstate_hash_one(new_state->hash, (const uint8_t *) name, name_len,
+                                 new_state->h, hash_len);
     }
     memcpy(new_state->ck, new_state->h, hash_len);
 
@@ -131,11 +129,10 @@ static int noise_symmetricstate_new
  *
  * \sa noise_symmetricstate_free(), noise_symmetricstate_new_by_name()
  */
-int noise_symmetricstate_new_by_id
-    (NoiseSymmetricState **state, const NoiseProtocolId *id)
-{
+int noise_symmetricstate_new_by_id(NoiseSymmetricState  **state,
+                                   const NoiseProtocolId *id) {
     char name[NOISE_MAX_PROTOCOL_NAME];
-    int err;
+    int  err;
 
     /* Validate the parameters */
     if (!state)
@@ -172,12 +169,10 @@ int noise_symmetricstate_new_by_id
  *
  * \sa noise_symmetricstate_free(), noise_symmetricstate_new_by_id()
  */
-int noise_symmetricstate_new_by_name
-    (NoiseSymmetricState **state, const char *name)
-{
+int noise_symmetricstate_new_by_name(NoiseSymmetricState **state, const char *name) {
     NoiseProtocolId id;
-    size_t name_len;
-    int err;
+    size_t          name_len;
+    int             err;
 
     /* Validate the parameters */
     if (!state)
@@ -188,7 +183,7 @@ int noise_symmetricstate_new_by_name
 
     /* Parse the protocol identifier and validate the names */
     name_len = strlen(name);
-    err = noise_protocol_name_to_id(&id, name, name_len);
+    err      = noise_protocol_name_to_id(&id, name, name_len);
     if (err != NOISE_ERROR_NONE)
         return err;
 
@@ -206,8 +201,7 @@ int noise_symmetricstate_new_by_name
  *
  * \sa noise_symmetricstate_new_by_id(), noise_symmetricstate_new_by_name()
  */
-int noise_symmetricstate_free(NoiseSymmetricState *state)
-{
+int noise_symmetricstate_free(NoiseSymmetricState *state) {
     /* Bail out if no symmetric state */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -234,9 +228,8 @@ int noise_symmetricstate_free(NoiseSymmetricState *state)
  * \return NOISE_ERROR_NONE on success.
  * \return NOISE_ERROR_INVALID_PARAM if \a state or \a id is NULL.
  */
-int noise_symmetricstate_get_protocol_id
-    (const NoiseSymmetricState *state, NoiseProtocolId *id)
-{
+int noise_symmetricstate_get_protocol_id(const NoiseSymmetricState *state,
+                                         NoiseProtocolId           *id) {
     /* Validate the parameters */
     if (!state || !id)
         return NOISE_ERROR_INVALID_PARAM;
@@ -259,12 +252,11 @@ int noise_symmetricstate_get_protocol_id
  *
  * \sa noise_symmetricstate_mix_hash(), noise_symmetricstate_split()
  */
-int noise_symmetricstate_mix_key
-    (NoiseSymmetricState *state, const uint8_t *input, size_t size)
-{
+int noise_symmetricstate_mix_key(NoiseSymmetricState *state, const uint8_t *input,
+                                 size_t size) {
     uint8_t temp_k[NOISE_MAX_HASHLEN];
-    size_t hash_len;
-    size_t key_len;
+    size_t  hash_len;
+    size_t  key_len;
 
     /* Validate the parameters */
     if (!state || !input)
@@ -276,10 +268,9 @@ int noise_symmetricstate_mix_key
 
     /* Mix the input data in using HKDF */
     hash_len = noise_hashstate_get_hash_length(state->hash);
-    key_len = noise_cipherstate_get_key_length(state->cipher);
-    noise_hashstate_hkdf
-        (state->hash, state->ck, hash_len, input, size,
-         state->ck, hash_len, temp_k, key_len);
+    key_len  = noise_cipherstate_get_key_length(state->cipher);
+    noise_hashstate_hkdf(state->hash, state->ck, hash_len, input, size, state->ck,
+                         hash_len, temp_k, key_len);
 
     /* Change the cipher key, or set it for the first time */
     noise_cipherstate_init_key(state->cipher, temp_k, key_len);
@@ -300,9 +291,8 @@ int noise_symmetricstate_mix_key
  *
  * \sa noise_symmetricstate_mix_key(), noise_symmetricstate_split()
  */
-int noise_symmetricstate_mix_hash
-    (NoiseSymmetricState *state, const uint8_t *input, size_t size)
-{
+int noise_symmetricstate_mix_hash(NoiseSymmetricState *state, const uint8_t *input,
+                                  size_t size) {
     size_t hash_len;
 
     /* Validate the parameters */
@@ -315,8 +305,8 @@ int noise_symmetricstate_mix_hash
 
     /* Mix the input data into "h" */
     hash_len = noise_hashstate_get_hash_length(state->hash);
-    noise_hashstate_hash_two
-        (state->hash, state->h, hash_len, input, size, state->h, hash_len);
+    noise_hashstate_hash_two(state->hash, state->h, hash_len, input, size, state->h,
+                             hash_len);
     return NOISE_ERROR_NONE;
 }
 
@@ -349,11 +339,10 @@ int noise_symmetricstate_mix_hash
  * \sa noise_symmetricstate_decrypt_and_hash(),
  * noise_symmetricstate_get_mac_length()
  */
-int noise_symmetricstate_encrypt_and_hash
-    (NoiseSymmetricState *state, NoiseBuffer *buffer)
-{
+int noise_symmetricstate_encrypt_and_hash(NoiseSymmetricState *state,
+                                          NoiseBuffer         *buffer) {
     size_t hash_len;
-    int err;
+    int    err;
 
     /* Validate the parameters */
     if (!state || !buffer || !(buffer->data))
@@ -365,8 +354,7 @@ int noise_symmetricstate_encrypt_and_hash
 
     /* Encrypt the plaintext using the underlying cipher */
     hash_len = noise_hashstate_get_hash_length(state->hash);
-    err = noise_cipherstate_encrypt_with_ad
-        (state->cipher, state->h, hash_len, buffer);
+    err = noise_cipherstate_encrypt_with_ad(state->cipher, state->h, hash_len, buffer);
     if (err != NOISE_ERROR_NONE)
         return err;
 
@@ -399,12 +387,11 @@ int noise_symmetricstate_encrypt_and_hash
  *
  * \sa noise_symmetricstate_encrypt_and_hash()
  */
-int noise_symmetricstate_decrypt_and_hash
-    (NoiseSymmetricState *state, NoiseBuffer *buffer)
-{
+int noise_symmetricstate_decrypt_and_hash(NoiseSymmetricState *state,
+                                          NoiseBuffer         *buffer) {
     uint8_t temp[NOISE_MAX_HASHLEN];
-    size_t hash_len;
-    int err;
+    size_t  hash_len;
+    int     err;
 
     /* Validate the parameters */
     if (!state || !buffer || !(buffer->data))
@@ -426,13 +413,11 @@ int noise_symmetricstate_decrypt_and_hash
        temporary copy of the hash.  If the decryption fails below,
        then we don't update the handshake hash with the bogus data */
     hash_len = noise_hashstate_get_hash_length(state->hash);
-    noise_hashstate_hash_two
-        (state->hash, state->h, hash_len,
-         buffer->data, buffer->size, temp, hash_len);
+    noise_hashstate_hash_two(state->hash, state->h, hash_len, buffer->data, buffer->size,
+                             temp, hash_len);
 
     /* Decrypt the ciphertext using the underlying cipher */
-    err = noise_cipherstate_decrypt_with_ad
-        (state->cipher, state->h, hash_len, buffer);
+    err = noise_cipherstate_decrypt_with_ad(state->cipher, state->h, hash_len, buffer);
     if (err != NOISE_ERROR_NONE) {
         noise_clean(temp, sizeof(temp));
         return err;
@@ -461,8 +446,7 @@ int noise_symmetricstate_decrypt_and_hash
  *
  * \sa noise_symmetricstate_encrypt_and_hash()
  */
-size_t noise_symmetricstate_get_mac_length(const NoiseSymmetricState *state)
-{
+size_t noise_symmetricstate_get_mac_length(const NoiseSymmetricState *state) {
     /* Validate the parameter */
     if (!state)
         return 0;
@@ -511,13 +495,12 @@ size_t noise_symmetricstate_get_mac_length(const NoiseSymmetricState *state)
  * \a c1 or \a c2 argument and the second CipherState will not be created
  * at all.
  */
-int noise_symmetricstate_split
-    (NoiseSymmetricState *state, NoiseCipherState **c1, NoiseCipherState **c2)
-{
+int noise_symmetricstate_split(NoiseSymmetricState *state, NoiseCipherState **c1,
+                               NoiseCipherState **c2) {
     uint8_t temp_k1[NOISE_MAX_HASHLEN];
     uint8_t temp_k2[NOISE_MAX_HASHLEN];
-    size_t hash_len;
-    size_t key_len;
+    size_t  hash_len;
+    size_t  key_len;
 
     /* Validate the parameters */
     if (!state)
@@ -535,16 +518,15 @@ int noise_symmetricstate_split
 
     /* Generate the two encryption keys with HKDF */
     hash_len = noise_hashstate_get_hash_length(state->hash);
-    key_len = noise_cipherstate_get_key_length(state->cipher);
-    noise_hashstate_hkdf
-        (state->hash, state->ck, hash_len, state->ck, 0,
-         temp_k1, key_len, temp_k2, key_len);
+    key_len  = noise_cipherstate_get_key_length(state->cipher);
+    noise_hashstate_hkdf(state->hash, state->ck, hash_len, state->ck, 0, temp_k1, key_len,
+                         temp_k2, key_len);
 
     /* If we only need c2, then re-initialize the key in the internal
        cipher and copy it to c2 */
     if (!c1 && c2) {
         noise_cipherstate_init_key(state->cipher, temp_k2, key_len);
-        *c2 = state->cipher;
+        *c2           = state->cipher;
         state->cipher = 0;
         noise_clean(temp_k1, sizeof(temp_k1));
         noise_clean(temp_k2, sizeof(temp_k2));
@@ -554,7 +536,7 @@ int noise_symmetricstate_split
     /* Split a copy out of the cipher and give it the second key.
        We don't need to do this if the second CipherSuite is not required */
     if (c2) {
-        *c2 = (*(state->cipher->create))();
+        *c2 = (*(state->cipher->create))(state->id.cipher_id);
         if (!(*c2)) {
             noise_clean(temp_k1, sizeof(temp_k1));
             noise_clean(temp_k2, sizeof(temp_k2));
@@ -565,7 +547,7 @@ int noise_symmetricstate_split
 
     /* Re-initialize the key in the internal cipher and copy it to c1 */
     noise_cipherstate_init_key(state->cipher, temp_k1, key_len);
-    *c1 = state->cipher;
+    *c1           = state->cipher;
     state->cipher = 0;
     noise_clean(temp_k1, sizeof(temp_k1));
     noise_clean(temp_k2, sizeof(temp_k2));

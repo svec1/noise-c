@@ -35,11 +35,9 @@ typedef struct NoiseRandState_s NoiseRandState;
 int noise_randstate_new(NoiseRandState **state);
 int noise_randstate_free(NoiseRandState *state);
 int noise_randstate_reseed(NoiseRandState *state);
-int noise_randstate_generate
-    (NoiseRandState *state, uint8_t *buffer, size_t len);
-int noise_randstate_pad
-    (NoiseRandState *state, uint8_t *payload, size_t orig_len,
-     size_t padded_len, int padding_mode);
+int noise_randstate_generate(NoiseRandState *state, uint8_t *buffer, size_t len);
+int noise_randstate_pad(NoiseRandState *state, uint8_t *payload, size_t orig_len,
+                        size_t padded_len, int padding_mode);
 int noise_randstate_generate_simple(uint8_t *buffer, size_t len);
 
 #ifdef __cplusplus

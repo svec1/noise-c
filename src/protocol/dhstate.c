@@ -64,8 +64,7 @@
  *
  * \sa noise_dhstate_free(), noise_dhstate_new_by_name()
  */
-int noise_dhstate_new_by_id(NoiseDHState **state, int id)
-{
+int noise_dhstate_new_by_id(NoiseDHState **state, int id) {
     /* The "state" argument must be non-NULL */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -73,21 +72,17 @@ int noise_dhstate_new_by_id(NoiseDHState **state, int id)
     /* Create the DHState object for the "id" */
     *state = 0;
     switch (id) {
-    case NOISE_DH_CURVE25519:
-        *state = noise_curve25519_new();
-        break;
+        case NOISE_DH_CURVE25519:
+            *state = noise_curve25519_new();
+            break;
 
-    case NOISE_DH_CURVE448:
-        *state = noise_curve448_new();
-        break;
+        case NOISE_DH_KYBER1024: {
+            NoiseDHState *got = noise_kyber_new();
+            *state            = got;
+        } break;
 
-    case NOISE_DH_KYBER1024: {
-        NoiseDHState* got = noise_kyber_new();
-        *state = got;
-    }   break;
-
-    default:
-        return NOISE_ERROR_UNKNOWN_ID;
+        default:
+            return NOISE_ERROR_UNKNOWN_ID;
     }
 
     /* Bail out if insufficient memory */
@@ -114,8 +109,7 @@ int noise_dhstate_new_by_id(NoiseDHState **state, int id)
  *
  * \sa noise_dhstate_free(), noise_dhstate_new_by_id()
  */
-int noise_dhstate_new_by_name(NoiseDHState **state, const char *name)
-{
+int noise_dhstate_new_by_name(NoiseDHState **state, const char *name) {
     int id;
 
     /* The "state" and "name" arguments must be non-NULL */
@@ -144,8 +138,7 @@ int noise_dhstate_new_by_name(NoiseDHState **state, const char *name)
  *
  * \sa noise_dhstate_new_by_id(), noise_dhstate_new_by_name()
  */
-int noise_dhstate_free(NoiseDHState *state)
-{
+int noise_dhstate_free(NoiseDHState *state) {
     /* Bail out if no DH state */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -166,8 +159,7 @@ int noise_dhstate_free(NoiseDHState *state)
  *
  * \return The algorithm identifier, or NOISE_DH_NONE if \a state is NULL.
  */
-int noise_dhstate_get_dh_id(const NoiseDHState *state)
-{
+int noise_dhstate_get_dh_id(const NoiseDHState *state) {
     return state ? state->dh_id : NOISE_DH_NONE;
 }
 
@@ -181,8 +173,7 @@ int noise_dhstate_get_dh_id(const NoiseDHState *state)
  * \sa noise_dhstate_get_private_key_length(),
  * noise_dhstate_get_shared_key_length()
  */
-size_t noise_dhstate_get_public_key_length(const NoiseDHState *state)
-{
+size_t noise_dhstate_get_public_key_length(const NoiseDHState *state) {
     return state ? state->public_key_len : 0;
 }
 
@@ -196,8 +187,7 @@ size_t noise_dhstate_get_public_key_length(const NoiseDHState *state)
  * \sa noise_dhstate_get_public_key_length(),
  * noise_dhstate_get_shared_key_length()
  */
-size_t noise_dhstate_get_private_key_length(const NoiseDHState *state)
-{
+size_t noise_dhstate_get_private_key_length(const NoiseDHState *state) {
     return state ? state->private_key_len : 0;
 }
 
@@ -211,8 +201,7 @@ size_t noise_dhstate_get_private_key_length(const NoiseDHState *state)
  * \sa noise_dhstate_get_public_key_length(),
  * noise_dhstate_get_private_key_length()
  */
-size_t noise_dhstate_get_shared_key_length(const NoiseDHState *state)
-{
+size_t noise_dhstate_get_shared_key_length(const NoiseDHState *state) {
     return state ? state->shared_key_len : 0;
 }
 
@@ -228,8 +217,7 @@ size_t noise_dhstate_get_shared_key_length(const NoiseDHState *state)
  * ephemeral keys during a session and have no support for long-term
  * static keys.
  */
-int noise_dhstate_is_ephemeral_only(const NoiseDHState *state)
-{
+int noise_dhstate_is_ephemeral_only(const NoiseDHState *state) {
     return state ? state->ephemeral_only : 0;
 }
 
@@ -245,8 +233,7 @@ int noise_dhstate_is_ephemeral_only(const NoiseDHState *state)
  * \sa noise_dhstate_set_keypair(), noise_dhstate_has_public_key(),
  * noise_dhstate_clear_key()
  */
-int noise_dhstate_has_keypair(const NoiseDHState *state)
-{
+int noise_dhstate_has_keypair(const NoiseDHState *state) {
     if (state)
         return state->key_type == NOISE_KEY_TYPE_KEYPAIR;
     else
@@ -265,8 +252,7 @@ int noise_dhstate_has_keypair(const NoiseDHState *state)
  * \sa noise_dhstate_set_keypair(), noise_dhstate_has_public_key(),
  * noise_dhstate_clear_key()
  */
-int noise_dhstate_has_public_key(const NoiseDHState *state)
-{
+int noise_dhstate_has_public_key(const NoiseDHState *state) {
     if (state)
         return state->key_type != NOISE_KEY_TYPE_NO_KEY;
     else
@@ -287,8 +273,7 @@ int noise_dhstate_has_public_key(const NoiseDHState *state)
  *
  * \sa noise_dhstate_calculate(), noise_dhstate_set_keypair()
  */
-int noise_dhstate_generate_keypair(NoiseDHState *state)
-{
+int noise_dhstate_generate_keypair(NoiseDHState *state) {
     int err;
 
     /* Validate the parameter */
@@ -329,9 +314,8 @@ int noise_dhstate_generate_keypair(NoiseDHState *state)
  *
  * \sa noise_dhstate_calculate(), noise_dhstate_set_keypair()
  */
-int noise_dhstate_generate_dependent_keypair
-    (NoiseDHState *state, const NoiseDHState *other)
-{
+int noise_dhstate_generate_dependent_keypair(NoiseDHState       *state,
+                                             const NoiseDHState *other) {
     int err;
 
     /* Validate the parameters */
@@ -371,10 +355,9 @@ int noise_dhstate_generate_dependent_keypair
  * \sa noise_dhstate_get_keypair(), noise_dhstate_set_public_key(),
  * noise_dhstate_set_keypair_private()
  */
-int noise_dhstate_set_keypair
-    (NoiseDHState *state, const uint8_t *private_key, size_t private_key_len,
-     const uint8_t *public_key, size_t public_key_len)
-{
+int noise_dhstate_set_keypair(NoiseDHState *state, const uint8_t *private_key,
+                              size_t private_key_len, const uint8_t *public_key,
+                              size_t public_key_len) {
     int err;
 
     /* Validate the parameters */
@@ -420,9 +403,8 @@ int noise_dhstate_set_keypair
  * \sa noise_dhstate_get_keypair(), noise_dhstate_set_public_key(),
  * noise_dhstate_set_keypair()
  */
-int noise_dhstate_set_keypair_private
-    (NoiseDHState *state, const uint8_t *private_key, size_t private_key_len)
-{
+int noise_dhstate_set_keypair_private(NoiseDHState *state, const uint8_t *private_key,
+                                      size_t private_key_len) {
     int err;
 
     /* Validate the parameters */
@@ -459,10 +441,9 @@ int noise_dhstate_set_keypair_private
  *
  * \sa noise_dhstate_set_keypair(), noise_dhstate_get_public_key()
  */
-int noise_dhstate_get_keypair
-    (const NoiseDHState *state, uint8_t *private_key, size_t private_key_len,
-     uint8_t *public_key, size_t public_key_len)
-{
+int noise_dhstate_get_keypair(const NoiseDHState *state, uint8_t *private_key,
+                              size_t private_key_len, uint8_t *public_key,
+                              size_t public_key_len) {
     /* Validate the parameters */
     if (!state || !private_key || !public_key)
         return NOISE_ERROR_INVALID_PARAM;
@@ -508,9 +489,8 @@ int noise_dhstate_get_keypair
  *
  * \sa noise_dhstate_get_public_key(), noise_dhstate_set_keypair()
  */
-int noise_dhstate_set_public_key
-    (NoiseDHState *state, const uint8_t *public_key, size_t public_key_len)
-{
+int noise_dhstate_set_public_key(NoiseDHState *state, const uint8_t *public_key,
+                                 size_t public_key_len) {
     int is_null, err;
 
     /* Validate the parameters */
@@ -519,11 +499,10 @@ int noise_dhstate_set_public_key
     if (public_key_len != state->public_key_len)
         return NOISE_ERROR_INVALID_LENGTH;
 
-
     /* Validate the public key with the back end and then ignore the
        result if the public key is the special null value */
     is_null = state->nulls_allowed & noise_is_zero(public_key, public_key_len);
-    err = (*(state->validate_public_key))(state, public_key);
+    err     = (*(state->validate_public_key))(state, public_key);
     err &= (is_null - 1);
     if (err != NOISE_ERROR_NONE)
         return err;
@@ -549,9 +528,8 @@ int noise_dhstate_set_public_key
  *
  * \sa noise_dhstate_set_public_key(), noise_dhstate_get_public_key_length()
  */
-int noise_dhstate_get_public_key
-    (const NoiseDHState *state, uint8_t *public_key, size_t public_key_len)
-{
+int noise_dhstate_get_public_key(const NoiseDHState *state, uint8_t *public_key,
+                                 size_t public_key_len) {
     /* Validate the parameters */
     if (!state || !public_key)
         return NOISE_ERROR_INVALID_PARAM;
@@ -575,8 +553,7 @@ int noise_dhstate_get_public_key
  *
  * \sa noise_dhstate_is_null_public_key()
  */
-int noise_dhstate_set_null_public_key(NoiseDHState *state)
-{
+int noise_dhstate_set_null_public_key(NoiseDHState *state) {
     /* Validate the parameter */
     if (!state || !state->nulls_allowed)
         return NOISE_ERROR_INVALID_PARAM;
@@ -601,11 +578,10 @@ int noise_dhstate_set_null_public_key(NoiseDHState *state)
  *
  * \sa noise_dhstate_set_null_public_key()
  */
-int noise_dhstate_is_null_public_key(const NoiseDHState *state)
-{
+int noise_dhstate_is_null_public_key(const NoiseDHState *state) {
     if (state && state->key_type != NOISE_KEY_TYPE_NO_KEY) {
-        return state->nulls_allowed &&
-               noise_is_zero(state->public_key, state->public_key_len);
+        return state->nulls_allowed
+               && noise_is_zero(state->public_key, state->public_key_len);
     } else {
         return 0;
     }
@@ -621,8 +597,7 @@ int noise_dhstate_is_null_public_key(const NoiseDHState *state)
  *
  * \sa noise_dhstate_has_keypair(), noise_dhstate_has_public_key()
  */
-int noise_dhstate_clear_key(NoiseDHState *state)
-{
+int noise_dhstate_clear_key(NoiseDHState *state) {
     /* Validate the parameter */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -644,12 +619,11 @@ int noise_dhstate_clear_key(NoiseDHState *state)
  * \param condition Condition that is 1 to move zero into \a data, or
  * zero to leave the contents of \a data as-is.
  */
-static void noise_cmove_zero(uint8_t *data, size_t len, int condition)
-{
+static void noise_cmove_zero(uint8_t *data, size_t len, int condition) {
     /* Turn the condition into an all-zeroes or all-ones mask.
        If the condition is set, then we want all-zeroes in the mask.
        If the condition is not set, then we want all-ones in the mask. */
-    uint8_t mask = ~((uint8_t)(-condition));
+    uint8_t mask = ~((uint8_t) (-condition));
 
     /* AND the contents of the data buffer with the mask */
     while (len > 0) {
@@ -684,11 +658,9 @@ static void noise_cmove_zero(uint8_t *data, size_t len, int condition)
  *
  * \sa noise_dhstate_generate_keypair()
  */
-int noise_dhstate_calculate
-    (const NoiseDHState *private_key_state,
-     const NoiseDHState *public_key_state,
-     uint8_t *shared_key, size_t shared_key_len)
-{
+int noise_dhstate_calculate(const NoiseDHState *private_key_state,
+                            const NoiseDHState *public_key_state, uint8_t *shared_key,
+                            size_t shared_key_len) {
     int is_null, err;
 
     /* Validate the parameters */
@@ -704,12 +676,13 @@ int noise_dhstate_calculate
     /* If the public key is null, then the output must be null too.
        We check for null now, but still perform the normal evaluation.
        At the end we will null out the result in constant time */
-    is_null = public_key_state->nulls_allowed & noise_is_zero
-        (public_key_state->public_key, public_key_state->public_key_len);
+    is_null =
+        public_key_state->nulls_allowed
+        & noise_is_zero(public_key_state->public_key, public_key_state->public_key_len);
 
     /* Perform the calculation */
-    err = (*(private_key_state->calculate))
-        (private_key_state, public_key_state, shared_key);
+    err = (*(private_key_state->calculate))(private_key_state, public_key_state,
+                                            shared_key);
 
     /* If the public key was null, then we need to set the shared key
        to null and replace any error we got from the back end with "none" */
@@ -729,8 +702,7 @@ int noise_dhstate_calculate
  * \return NOISE_ERROR_NOT_APPLICABLE if \a from does not have the same
  * key type identifier as \a state.
  */
-int noise_dhstate_copy(NoiseDHState *state, const NoiseDHState *from)
-{
+int noise_dhstate_copy(NoiseDHState *state, const NoiseDHState *from) {
     int err;
 
     /* Validate the parameters */
@@ -774,9 +746,8 @@ int noise_dhstate_copy(NoiseDHState *state, const NoiseDHState *from)
  * hash value is truncated to the first 16 bytes.  If the type is
  * NOISE_FINGERPRINT_FULL, then the entire 32 byte hash value is formatted.
  */
-int noise_dhstate_format_fingerprint
-    (const NoiseDHState *state, int fingerprint_type, char *buffer, size_t len)
-{
+int noise_dhstate_format_fingerprint(const NoiseDHState *state, int fingerprint_type,
+                                     char *buffer, size_t len) {
     /* Validate the parameters */
     if (!buffer)
         return NOISE_ERROR_INVALID_PARAM;
@@ -789,9 +760,8 @@ int noise_dhstate_format_fingerprint
         return NOISE_ERROR_INVALID_STATE;
 
     /* Format the fingerprint */
-    return noise_format_fingerprint
-        (fingerprint_type, buffer, len,
-         state->public_key, state->public_key_len);
+    return noise_format_fingerprint(fingerprint_type, buffer, len, state->public_key,
+                                    state->public_key_len);
 }
 
 /**
@@ -804,8 +774,7 @@ int noise_dhstate_format_fingerprint
  *
  * \sa noise_dhstate_set_role()
  */
-int noise_dhstate_get_role(const NoiseDHState *state)
-{
+int noise_dhstate_get_role(const NoiseDHState *state) {
     return state ? state->role : 0;
 }
 
@@ -834,8 +803,7 @@ int noise_dhstate_get_role(const NoiseDHState *state)
  *
  * \sa noise_dhstate_get_role()
  */
-int noise_dhstate_set_role(NoiseDHState *state, int role)
-{
+int noise_dhstate_set_role(NoiseDHState *state, int role) {
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
     if (role != NOISE_ROLE_INITIATOR && role != NOISE_ROLE_RESPONDER && role)

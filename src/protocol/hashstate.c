@@ -70,8 +70,7 @@
  *
  * \sa noise_hashstate_free(), noise_hashstate_new_by_name()
  */
-int noise_hashstate_new_by_id(NoiseHashState **state, int id)
-{
+int noise_hashstate_new_by_id(NoiseHashState **state, int id) {
     /* The "state" argument must be non-NULL */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -79,24 +78,18 @@ int noise_hashstate_new_by_id(NoiseHashState **state, int id)
     /* Create the HashState object for the "id" */
     *state = 0;
     switch (id) {
-    case NOISE_HASH_BLAKE2s:
-        *state = noise_blake2s_new();
-        break;
+        case NOISE_HASH_BLAKE2b:
+        case NOISE_HASH_BLAKE2s:
+            *state = noise_blake_new(id);
+            break;
 
-    case NOISE_HASH_BLAKE2b:
-        *state = noise_blake2b_new();
-        break;
+        case NOISE_HASH_SHA256:
+        case NOISE_HASH_SHA512:
+            *state = noise_sha_new(id);
+            break;
 
-    case NOISE_HASH_SHA256:
-        *state = noise_sha256_new();
-        break;
-
-    case NOISE_HASH_SHA512:
-        *state = noise_sha512_new();
-        break;
-
-    default:
-        return NOISE_ERROR_UNKNOWN_ID;
+        default:
+            return NOISE_ERROR_UNKNOWN_ID;
     }
 
     /* Bail out if insufficient memory */
@@ -123,8 +116,7 @@ int noise_hashstate_new_by_id(NoiseHashState **state, int id)
  *
  * \sa noise_hashstate_free(), noise_hashstate_new_by_id()
  */
-int noise_hashstate_new_by_name(NoiseHashState **state, const char *name)
-{
+int noise_hashstate_new_by_name(NoiseHashState **state, const char *name) {
     int id;
 
     /* The "state" and "name" arguments must be non-NULL */
@@ -153,8 +145,7 @@ int noise_hashstate_new_by_name(NoiseHashState **state, const char *name)
  *
  * \sa noise_hashstate_new_by_id(), noise_hashstate_new_by_name()
  */
-int noise_hashstate_free(NoiseHashState *state)
-{
+int noise_hashstate_free(NoiseHashState *state) {
     /* Bail out if no hash state */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -175,8 +166,7 @@ int noise_hashstate_free(NoiseHashState *state)
  *
  * \return The algorithm identifier, or NOISE_HASH_NONE if \a state is NULL.
  */
-int noise_hashstate_get_hash_id(const NoiseHashState *state)
-{
+int noise_hashstate_get_hash_id(const NoiseHashState *state) {
     return state ? state->hash_id : NOISE_HASH_NONE;
 }
 
@@ -189,8 +179,7 @@ int noise_hashstate_get_hash_id(const NoiseHashState *state)
  *
  * \sa noise_hashstate_get_block_length()
  */
-size_t noise_hashstate_get_hash_length(const NoiseHashState *state)
-{
+size_t noise_hashstate_get_hash_length(const NoiseHashState *state) {
     return state ? state->hash_len : 0;
 }
 
@@ -203,8 +192,7 @@ size_t noise_hashstate_get_hash_length(const NoiseHashState *state)
  *
  * \sa noise_hashstate_get_hash_length()
  */
-size_t noise_hashstate_get_block_length(const NoiseHashState *state)
-{
+size_t noise_hashstate_get_block_length(const NoiseHashState *state) {
     return state ? state->block_len : 0;
 }
 
@@ -218,8 +206,7 @@ size_t noise_hashstate_get_block_length(const NoiseHashState *state)
  *
  * \sa noise_hashstate_update(), noise_hashstate_finalize()
  */
-int noise_hashstate_reset(NoiseHashState *state)
-{
+int noise_hashstate_reset(NoiseHashState *state) {
     /* Validate the parameter */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -241,9 +228,7 @@ int noise_hashstate_reset(NoiseHashState *state)
  *
  * \sa noise_hashstate_reset(), noise_hashstate_finalize()
  */
-int noise_hashstate_update
-    (NoiseHashState *state, const uint8_t *data, size_t data_len)
-{
+int noise_hashstate_update(NoiseHashState *state, const uint8_t *data, size_t data_len) {
     /* Validate the parameters */
     if (!state || !data)
         return NOISE_ERROR_INVALID_PARAM;
@@ -268,9 +253,7 @@ int noise_hashstate_update
  * \sa noise_hashstate_reset(), noise_hashstate_update(),
  * noise_hashstate_get_hash_length()
  */
-int noise_hashstate_finalize
-    (NoiseHashState *state, uint8_t *hash, size_t hash_len)
-{
+int noise_hashstate_finalize(NoiseHashState *state, uint8_t *hash, size_t hash_len) {
     /* Validate the parameters */
     if (!state || !hash)
         return NOISE_ERROR_INVALID_PARAM;
@@ -305,10 +288,8 @@ int noise_hashstate_finalize
  *
  * \sa noise_hashstate_hash_two(), noise_hashstate_get_hash_length()
  */
-int noise_hashstate_hash_one
-    (NoiseHashState *state, const uint8_t *data, size_t data_len,
-     uint8_t *hash, size_t hash_len)
-{
+int noise_hashstate_hash_one(NoiseHashState *state, const uint8_t *data, size_t data_len,
+                             uint8_t *hash, size_t hash_len) {
     /* Validate the parameters */
     if (!state || !data || !hash)
         return NOISE_ERROR_INVALID_PARAM;
@@ -348,10 +329,9 @@ int noise_hashstate_hash_one
  *
  * \sa noise_hashstate_hash_one(), noise_hashstate_get_hash_length()
  */
-int noise_hashstate_hash_two
-    (NoiseHashState *state, const uint8_t *data1, size_t data1_len,
-     const uint8_t *data2, size_t data2_len, uint8_t *hash, size_t hash_len)
-{
+int noise_hashstate_hash_two(NoiseHashState *state, const uint8_t *data1,
+                             size_t data1_len, const uint8_t *data2, size_t data2_len,
+                             uint8_t *hash, size_t hash_len) {
     /* Validate the parameters */
     if (!state || !data1 || !data2 || !hash)
         return NOISE_ERROR_INVALID_PARAM;
@@ -367,8 +347,8 @@ int noise_hashstate_hash_two
 }
 
 /** @cond */
-#define HMAC_IPAD   0x36    /**< Padding value for the inner HMAC context */
-#define HMAC_OPAD   0x5C    /**< Padding value for the outer HMAC context */
+#define HMAC_IPAD 0x36 /**< Padding value for the inner HMAC context */
+#define HMAC_OPAD 0x5C /**< Padding value for the outer HMAC context */
 /** @endcond */
 
 /**
@@ -378,8 +358,7 @@ int noise_hashstate_hash_two
  * \param key_len The length of the key in bytes.
  * \param value The byte value to XOR into the \a key.
  */
-static void noise_hashstate_xor_key(uint8_t *key, size_t key_len, uint8_t value)
-{
+static void noise_hashstate_xor_key(uint8_t *key, size_t key_len, uint8_t value) {
     while (key_len > 0) {
         *key++ ^= value;
         --key_len;
@@ -403,13 +382,11 @@ static void noise_hashstate_xor_key(uint8_t *key, size_t key_len, uint8_t value)
  *
  * Reference: <a href="http://tools.ietf.org/html/rfc2104">RFC 2104</a>
  */
-static void noise_hashstate_hmac
-    (NoiseHashState *state, const uint8_t *key, size_t key_len,
-     const uint8_t *data1, size_t data1_len,
-     const uint8_t *data2, size_t data2_len, uint8_t *hash)
-{
-    size_t hash_len = state->hash_len;
-    size_t block_len = state->block_len;
+static void noise_hashstate_hmac(NoiseHashState *state, const uint8_t *key,
+                                 size_t key_len, const uint8_t *data1, size_t data1_len,
+                                 const uint8_t *data2, size_t data2_len, uint8_t *hash) {
+    size_t   hash_len  = state->hash_len;
+    size_t   block_len = state->block_len;
     uint8_t *key_block;
 
     /* Allocate temporary stack space for the key block */
@@ -473,13 +450,10 @@ static void noise_hashstate_hmac
  *
  * \sa noise_hashstate_hash_one()
  */
-int noise_hashstate_hkdf
-    (NoiseHashState *state, const uint8_t *key, size_t key_len,
-     const uint8_t *data, size_t data_len,
-     uint8_t *output1, size_t output1_len,
-     uint8_t *output2, size_t output2_len)
-{
-    size_t hash_len;
+int noise_hashstate_hkdf(NoiseHashState *state, const uint8_t *key, size_t key_len,
+                         const uint8_t *data, size_t data_len, uint8_t *output1,
+                         size_t output1_len, uint8_t *output2, size_t output2_len) {
+    size_t   hash_len;
     uint8_t *temp_key;
     uint8_t *temp_hash;
 
@@ -491,7 +465,7 @@ int noise_hashstate_hkdf
         return NOISE_ERROR_INVALID_LENGTH;
 
     /* Allocate local stack space for the temporary hash values */
-    temp_key = alloca(hash_len);
+    temp_key  = alloca(hash_len);
     temp_hash = alloca(hash_len + 1);
 
     /* Generate the temporary hashing key */
@@ -499,14 +473,13 @@ int noise_hashstate_hkdf
 
     /* Generate the first output */
     temp_hash[0] = 0x01;
-    noise_hashstate_hmac
-        (state, temp_key, hash_len, temp_hash, 1, 0, 0, temp_hash);
+    noise_hashstate_hmac(state, temp_key, hash_len, temp_hash, 1, 0, 0, temp_hash);
     memcpy(output1, temp_hash, output1_len);
 
     /* Generate the second output */
     temp_hash[hash_len] = 0x02;
-    noise_hashstate_hmac
-        (state, temp_key, hash_len, temp_hash, hash_len + 1, 0, 0, temp_hash);
+    noise_hashstate_hmac(state, temp_key, hash_len, temp_hash, hash_len + 1, 0, 0,
+                         temp_hash);
     memcpy(output2, temp_hash, output2_len);
 
     /* Clean up and exit */
@@ -538,23 +511,21 @@ int noise_hashstate_hkdf
  *
  * Reference: <a href="https://www.ietf.org/rfc/rfc2898.txt">RFC 2898</a>
  */
-int noise_hashstate_pbkdf2
-    (NoiseHashState *state, const uint8_t *passphrase, size_t passphrase_len,
-     const uint8_t *salt, size_t salt_len, size_t iterations,
-     uint8_t *output, size_t output_len)
-{
-    size_t hash_len;
+int noise_hashstate_pbkdf2(NoiseHashState *state, const uint8_t *passphrase,
+                           size_t passphrase_len, const uint8_t *salt, size_t salt_len,
+                           size_t iterations, uint8_t *output, size_t output_len) {
+    size_t   hash_len;
     uint64_t max_size;
-    uint8_t T[NOISE_MAX_HASHLEN];
-    uint8_t U[NOISE_MAX_HASHLEN];
-    uint8_t ibuf[4];
-    size_t i, index, index2;
+    uint8_t  T[NOISE_MAX_HASHLEN];
+    uint8_t  U[NOISE_MAX_HASHLEN];
+    uint8_t  ibuf[4];
+    size_t   i, index, index2;
 
     /* Validate the parameters */
     if (!state || !passphrase || !salt || !output)
         return NOISE_ERROR_INVALID_PARAM;
     hash_len = state->hash_len;
-    max_size = ((uint64_t)0xFFFFFFFFU) * hash_len;
+    max_size = ((uint64_t) 0xFFFFFFFFU) * hash_len;
     if (output_len > max_size)
         return NOISE_ERROR_INVALID_LENGTH;
 
@@ -562,18 +533,16 @@ int noise_hashstate_pbkdf2
     i = 1;
     while (output_len > 0) {
         /* Generate the next block of output */
-        ibuf[0] = (uint8_t)(i >> 24);
-        ibuf[1] = (uint8_t)(i >> 16);
-        ibuf[2] = (uint8_t)(i >> 8);
-        ibuf[3] = (uint8_t)i;
+        ibuf[0] = (uint8_t) (i >> 24);
+        ibuf[1] = (uint8_t) (i >> 16);
+        ibuf[2] = (uint8_t) (i >> 8);
+        ibuf[3] = (uint8_t) i;
         ++i;
-        noise_hashstate_hmac
-            (state, passphrase, passphrase_len, salt, salt_len,
-             ibuf, sizeof(ibuf), T);
+        noise_hashstate_hmac(state, passphrase, passphrase_len, salt, salt_len, ibuf,
+                             sizeof(ibuf), T);
         memcpy(U, T, hash_len);
         for (index = 1; index < iterations; ++index) {
-            noise_hashstate_hmac
-                (state, passphrase, passphrase_len, U, hash_len, 0, 0, U);
+            noise_hashstate_hmac(state, passphrase, passphrase_len, U, hash_len, 0, 0, U);
             for (index2 = 0; index2 < hash_len; ++index2)
                 T[index2] ^= U[index2];
         }
@@ -600,8 +569,7 @@ int noise_hashstate_pbkdf2
  *
  * \sa noise_hashstate_get_max_block_length()
  */
-int noise_hashstate_get_max_hash_length(void)
-{
+int noise_hashstate_get_max_hash_length(void) {
     return NOISE_MAX_HASHLEN;
 }
 
@@ -610,8 +578,7 @@ int noise_hashstate_get_max_hash_length(void)
  *
  * \sa noise_hashstate_get_max_hash_length()
  */
-int noise_hashstate_get_max_block_length(void)
-{
+int noise_hashstate_get_max_block_length(void) {
     return 128;
 }
 

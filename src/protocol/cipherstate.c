@@ -51,10 +51,10 @@
 /** @cond */
 
 /** Maximum length of an encryption key across all back ends */
-#define NOISE_MAX_KEY_LEN   32
+#define NOISE_MAX_KEY_LEN 32
 
 /** Maximum length of a MAC value across all back ends */
-#define NOISE_MAX_MAC_LEN   16
+#define NOISE_MAX_MAC_LEN 16
 
 /** @endcond */
 
@@ -74,8 +74,7 @@
  *
  * \sa noise_cipherstate_free(), noise_cipherstate_new_by_name()
  */
-int noise_cipherstate_new_by_id(NoiseCipherState **state, int id)
-{
+int noise_cipherstate_new_by_id(NoiseCipherState **state, int id) {
     /* The "state" argument must be non-NULL */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -83,16 +82,13 @@ int noise_cipherstate_new_by_id(NoiseCipherState **state, int id)
     /* Create the CipherState object for the "id" */
     *state = 0;
     switch (id) {
-    case NOISE_CIPHER_CHACHAPOLY:
-        *state = noise_chachapoly_new();
-        break;
+        case NOISE_CIPHER_CHACHAPOLY:
+        case NOISE_CIPHER_AESGCM:
+            *state = noise_aead_cipher_new(id);
+            break;
 
-    case NOISE_CIPHER_AESGCM:
-        *state = noise_aesgcm_new();
-        break;
-
-    default:
-        return NOISE_ERROR_UNKNOWN_ID;
+        default:
+            return NOISE_ERROR_UNKNOWN_ID;
     }
 
     /* Bail out if insufficient memory */
@@ -119,8 +115,7 @@ int noise_cipherstate_new_by_id(NoiseCipherState **state, int id)
  *
  * \sa noise_cipherstate_free(), noise_cipherstate_new_by_id()
  */
-int noise_cipherstate_new_by_name(NoiseCipherState **state, const char *name)
-{
+int noise_cipherstate_new_by_name(NoiseCipherState **state, const char *name) {
     int id;
 
     /* The "state" and "name" arguments must be non-NULL */
@@ -149,8 +144,7 @@ int noise_cipherstate_new_by_name(NoiseCipherState **state, const char *name)
  *
  * \sa noise_cipherstate_new_by_id(), noise_cipherstate_new_by_name()
  */
-int noise_cipherstate_free(NoiseCipherState *state)
-{
+int noise_cipherstate_free(NoiseCipherState *state) {
     /* Bail out if no cipher state */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -171,8 +165,7 @@ int noise_cipherstate_free(NoiseCipherState *state)
  *
  * \return The algorithm identifier, or NOISE_CIPHER_NONE if \a state is NULL.
  */
-int noise_cipherstate_get_cipher_id(const NoiseCipherState *state)
-{
+int noise_cipherstate_get_cipher_id(const NoiseCipherState *state) {
     return state ? state->cipher_id : NOISE_CIPHER_NONE;
 }
 
@@ -185,8 +178,7 @@ int noise_cipherstate_get_cipher_id(const NoiseCipherState *state)
  *
  * \sa noise_cipherstate_get_mac_length()
  */
-size_t noise_cipherstate_get_key_length(const NoiseCipherState *state)
-{
+size_t noise_cipherstate_get_key_length(const NoiseCipherState *state) {
     return state ? state->key_len : 0;
 }
 
@@ -199,8 +191,7 @@ size_t noise_cipherstate_get_key_length(const NoiseCipherState *state)
  *
  * \sa noise_cipherstate_get_key_length()
  */
-size_t noise_cipherstate_get_mac_length(const NoiseCipherState *state)
-{
+size_t noise_cipherstate_get_mac_length(const NoiseCipherState *state) {
     return state ? state->mac_len : 0;
 }
 
@@ -218,9 +209,8 @@ size_t noise_cipherstate_get_mac_length(const NoiseCipherState *state)
  *
  * \sa noise_cipherstate_get_key_length(), noise_cipherstate_has_key()
  */
-int noise_cipherstate_init_key
-    (NoiseCipherState *state, const uint8_t *key, size_t key_len)
-{
+int noise_cipherstate_init_key(NoiseCipherState *state, const uint8_t *key,
+                               size_t key_len) {
     /* Validate the parameters */
     if (!state || !key)
         return NOISE_ERROR_INVALID_PARAM;
@@ -230,7 +220,7 @@ int noise_cipherstate_init_key
     /* Set the key */
     (*(state->init_key))(state, key);
     state->has_key = 1;
-    state->n = 0;
+    state->n       = 0;
     return NOISE_ERROR_NONE;
 }
 
@@ -244,8 +234,7 @@ int noise_cipherstate_init_key
  *
  * \sa noise_cipherstate_init_key()
  */
-int noise_cipherstate_has_key(const NoiseCipherState *state)
-{
+int noise_cipherstate_has_key(const NoiseCipherState *state) {
     return state ? state->has_key : 0;
 }
 
@@ -290,10 +279,8 @@ int noise_cipherstate_has_key(const NoiseCipherState *state)
  *
  * \sa noise_cipherstate_decrypt_with_ad(), noise_cipherstate_get_mac_length()
  */
-int noise_cipherstate_encrypt_with_ad
-    (NoiseCipherState *state, const uint8_t *ad, size_t ad_len,
-     NoiseBuffer *buffer)
-{
+int noise_cipherstate_encrypt_with_ad(NoiseCipherState *state, const uint8_t *ad,
+                                      size_t ad_len, NoiseBuffer *buffer) {
     int err;
 
     /* Validate the parameters */
@@ -310,7 +297,7 @@ int noise_cipherstate_encrypt_with_ad
     }
 
     /* Make sure that there is room for the MAC */
-    if (buffer->size > (size_t)(NOISE_MAX_PAYLOAD_LEN - state->mac_len))
+    if (buffer->size > (size_t) (NOISE_MAX_PAYLOAD_LEN - state->mac_len))
         return NOISE_ERROR_INVALID_LENGTH;
     if ((buffer->max_size - buffer->size) < state->mac_len)
         return NOISE_ERROR_INVALID_LENGTH;
@@ -370,10 +357,8 @@ int noise_cipherstate_encrypt_with_ad
  *
  * \sa noise_cipherstate_encrypt_with_ad(), noise_cipherstate_get_mac_length()
  */
-int noise_cipherstate_decrypt_with_ad
-    (NoiseCipherState *state, const uint8_t *ad, size_t ad_len,
-     NoiseBuffer *buffer)
-{
+int noise_cipherstate_decrypt_with_ad(NoiseCipherState *state, const uint8_t *ad,
+                                      size_t ad_len, NoiseBuffer *buffer) {
     int err;
 
     /* Validate the parameters */
@@ -398,8 +383,8 @@ int noise_cipherstate_decrypt_with_ad
         return NOISE_ERROR_INVALID_NONCE;
 
     /* Decrypt the ciphertext and check the MAC */
-    err = (*(state->decrypt))
-        (state, ad, ad_len, buffer->data, buffer->size - state->mac_len);
+    err = (*(state->decrypt))(state, ad, ad_len, buffer->data,
+                              buffer->size - state->mac_len);
     if (err != NOISE_ERROR_NONE)
         return err;
 
@@ -450,8 +435,7 @@ int noise_cipherstate_decrypt_with_ad
  *
  * \sa noise_cipherstate_encrypt_with_ad()
  */
-int noise_cipherstate_encrypt(NoiseCipherState *state, NoiseBuffer *buffer)
-{
+int noise_cipherstate_encrypt(NoiseCipherState *state, NoiseBuffer *buffer) {
     return noise_cipherstate_encrypt_with_ad(state, NULL, 0, buffer);
 }
 
@@ -492,8 +476,7 @@ int noise_cipherstate_encrypt(NoiseCipherState *state, NoiseBuffer *buffer)
  *
  * \sa noise_cipherstate_decrypt_with_ad()
  */
-int noise_cipherstate_decrypt(NoiseCipherState *state, NoiseBuffer *buffer)
-{
+int noise_cipherstate_decrypt(NoiseCipherState *state, NoiseBuffer *buffer) {
     return noise_cipherstate_decrypt_with_ad(state, NULL, 0, buffer);
 }
 
@@ -516,8 +499,7 @@ int noise_cipherstate_decrypt(NoiseCipherState *state, NoiseBuffer *buffer)
  *
  * \sa noise_cipherstate_init_key()
  */
-int noise_cipherstate_set_nonce(NoiseCipherState *state, uint64_t nonce)
-{
+int noise_cipherstate_set_nonce(NoiseCipherState *state, uint64_t nonce) {
     /* Bail out if the state is NULL */
     if (!state)
         return NOISE_ERROR_INVALID_PARAM;
@@ -536,12 +518,28 @@ int noise_cipherstate_set_nonce(NoiseCipherState *state, uint64_t nonce)
 }
 
 /**
+ * \brief Gets the nonce of this cipherstate object.
+ *
+ * \sa noise_cipherstate_get_max_key_length()
+ */
+uint64_t noise_cipherstate_get_nonce(NoiseCipherState *state) {
+    /* Bail out if the state is NULL */
+    if (!state)
+        return NOISE_ERROR_INVALID_PARAM;
+
+    /* If the key hasn't been set yet, we cannot do this */
+    if (!state->has_key)
+        return NOISE_ERROR_INVALID_STATE;
+
+    return state->n;
+}
+
+/**
  * \brief Gets the maximum key length for the supported algorithms.
  *
  * \sa noise_cipherstate_get_max_mac_length()
  */
-int noise_cipherstate_get_max_key_length(void)
-{
+int noise_cipherstate_get_max_key_length(void) {
     return NOISE_MAX_KEY_LEN;
 }
 
@@ -550,19 +548,17 @@ int noise_cipherstate_get_max_key_length(void)
  *
  * \sa noise_cipherstate_get_max_key_length()
  */
-int noise_cipherstate_get_max_mac_length(void)
-{
+int noise_cipherstate_get_max_mac_length(void) {
     return NOISE_MAX_MAC_LEN;
 }
 
 /**
  * \brief Rekeys the cipherstate as described in Noise protocol spec section 4.2.
  */
-int noise_cipherstate_rekey(NoiseCipherState* state)
-{
-    int err;
+int noise_cipherstate_rekey(NoiseCipherState *state) {
+    int      err;
     uint64_t n;
-    uint8_t new_key[NOISE_MAX_KEY_LEN + NOISE_MAX_MAC_LEN];
+    uint8_t  new_key[NOISE_MAX_KEY_LEN + NOISE_MAX_MAC_LEN];
     if (!state)
         return NOISE_ERROR_INVALID_STATE;
     if (!state->has_key)
@@ -571,11 +567,11 @@ int noise_cipherstate_rekey(NoiseCipherState* state)
     memset(new_key, 0, sizeof(new_key));
 
     /* we call encrypt with max nonce, then reset to the current value */
-    n = state->n;
+    n        = state->n;
     state->n = 0xFFFFFFFFFFFFFFFFULL;
 
     /* Encrypt the plaintext and authenticate it */
-    err = (*(state->encrypt))(state, NULL, 0, new_key, state->key_len);
+    err      = (*(state->encrypt))(state, NULL, 0, new_key, state->key_len);
     state->n = n;
 
     if (err != NOISE_ERROR_NONE)
