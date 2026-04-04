@@ -19,6 +19,7 @@ file(
 )
 
 set(CNOISE_SOURCE_FILES ${CRYPTO_SOURCE_FILES} ${PROTOCOL_SOURCE_FILES} ${MLKEM1024_AMD64_AVX2})
+set(CNOISE_INCLUDE_DIR include/)
 
 project(${NAME_PROJECT_CNOISE} LANGUAGES C ASM)
 
@@ -46,7 +47,7 @@ target_include_directories(
     PRIVATE
     src/ 
     PUBLIC
-    include/
+    ${CNOISE_INCLUDE_DIR}
     thirdparty/portable/include
     thirdparty/BLAKE2/ref
     thirdparty/mlkem-libjade/src
