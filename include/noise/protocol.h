@@ -23,17 +23,16 @@
 #ifndef NOISE_PROTOCOL_H
 #define NOISE_PROTOCOL_H
 
-#include <noise/protocol/constants.h>
-#include <noise/protocol/errors.h>
-#include <noise/protocol/names.h>
 #include <noise/protocol/buffer.h>
 #include <noise/protocol/cipherstate.h>
-#include <noise/protocol/hashstate.h>
+#include <noise/protocol/constants.h>
 #include <noise/protocol/dhstate.h>
-#include <noise/protocol/signstate.h>
+#include <noise/protocol/errors.h>
+#include <noise/protocol/handshakestate.h>
+#include <noise/protocol/hashstate.h>
+#include <noise/protocol/names.h>
 #include <noise/protocol/randstate.h>
 #include <noise/protocol/symmetricstate.h>
-#include <noise/protocol/handshakestate.h>
 #include <noise/protocol/util.h>
 
 #endif
