@@ -20,8 +20,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#include <noise/protocol.h>
 #include "json-reader.h"
+#include <noise/protocol.h>
 #include <setjmp.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,52 +32,51 @@
 /**
  * \brief Information about a single test vector.
  */
-typedef struct
-{
-    long line_number;               /**< Line number for the "name" */
-    char *name;                     /**< Full name of the test case */
-    char *protocol_name;            /**< Full name of the protocol */
-    char *pattern;                  /**< Name of the handshake pattern */
-    char *dh;                       /**< Name of the DH algorithm */
-    char *hybrid;                   /**< Name of the hybrid secrecy algorithm */
-    char *cipher;                   /**< Name of the cipher algorithm */
-    char *hash;                     /**< Name of the hash algorithm */
-    uint8_t *init_static;           /**< Initiator's static private key */
-    size_t init_static_len;         /**< Length of init_static in bytes */
-    uint8_t *init_public_static;    /**< Initiator's public key known to responder */
-    size_t init_public_static_len;  /**< Length of init_public_static in bytes */
-    uint8_t *resp_static;           /**< Responder's static private key */
-    size_t resp_static_len;         /**< Length of resp_static in bytes */
-    uint8_t *resp_public_static;    /**< Responder's public key known to initiator */
-    size_t resp_public_static_len;  /**< Length of resp_public_static in bytes */
-    uint8_t *init_ephemeral;        /**< Initiator's ephemeral key */
-    size_t init_ephemeral_len;      /**< Length of init_ephemeral in bytes */
-    uint8_t *resp_ephemeral;        /**< Responder's ephemeral key */
-    size_t resp_ephemeral_len;      /**< Length of resp_ephemeral in bytes */
-    uint8_t *init_hybrid;           /**< Initiator's hybrid ephemeral key */
-    size_t init_hybrid_len;         /**< Length of init_hybrid in bytes */
-    uint8_t *resp_hybrid;           /**< Responder's hybrid ephemeral key */
-    size_t resp_hybrid_len;         /**< Length of resp_hybrid in bytes */
-    uint8_t *init_prologue;         /**< Initiator's prologue data */
-    size_t init_prologue_len;       /**< Length of init_prologue in bytes */
-    uint8_t *resp_prologue;         /**< Responder's prologue data */
-    size_t resp_prologue_len;       /**< Length of resp_prologue in bytes */
-    uint8_t *init_psk;              /**< Initiator's pre shared key */
-    size_t init_psk_len;            /**< Length of init_psk in bytes */
-    uint8_t *resp_psk;              /**< Responder's pre shared key */
-    size_t resp_psk_len;            /**< Length of resp_psk in bytes */
-    uint8_t *handshake_hash;        /**< Hash at the end of the handshake */
-    size_t handshake_hash_len;      /**< Length of handshake_hash in bytes */
-    int fail;                       /**< Failure expected on last message */
-    int fallback;                   /**< Handshake involves IK to XXfallback */
-    char *fallback_pattern;         /**< Name of the pattern to fall back to */
+typedef struct {
+    long     line_number;            /**< Line number for the "name" */
+    char    *name;                   /**< Full name of the test case */
+    char    *protocol_name;          /**< Full name of the protocol */
+    char    *pattern;                /**< Name of the handshake pattern */
+    char    *dh;                     /**< Name of the DH algorithm */
+    char    *hybrid;                 /**< Name of the hybrid secrecy algorithm */
+    char    *cipher;                 /**< Name of the cipher algorithm */
+    char    *hash;                   /**< Name of the hash algorithm */
+    uint8_t *init_static;            /**< Initiator's static private key */
+    size_t   init_static_len;        /**< Length of init_static in bytes */
+    uint8_t *init_public_static;     /**< Initiator's public key known to responder */
+    size_t   init_public_static_len; /**< Length of init_public_static in bytes */
+    uint8_t *resp_static;            /**< Responder's static private key */
+    size_t   resp_static_len;        /**< Length of resp_static in bytes */
+    uint8_t *resp_public_static;     /**< Responder's public key known to initiator */
+    size_t   resp_public_static_len; /**< Length of resp_public_static in bytes */
+    uint8_t *init_ephemeral;         /**< Initiator's ephemeral key */
+    size_t   init_ephemeral_len;     /**< Length of init_ephemeral in bytes */
+    uint8_t *resp_ephemeral;         /**< Responder's ephemeral key */
+    size_t   resp_ephemeral_len;     /**< Length of resp_ephemeral in bytes */
+    uint8_t *init_hybrid;            /**< Initiator's hybrid ephemeral key */
+    size_t   init_hybrid_len;        /**< Length of init_hybrid in bytes */
+    uint8_t *resp_hybrid;            /**< Responder's hybrid ephemeral key */
+    size_t   resp_hybrid_len;        /**< Length of resp_hybrid in bytes */
+    uint8_t *init_prologue;          /**< Initiator's prologue data */
+    size_t   init_prologue_len;      /**< Length of init_prologue in bytes */
+    uint8_t *resp_prologue;          /**< Responder's prologue data */
+    size_t   resp_prologue_len;      /**< Length of resp_prologue in bytes */
+    uint8_t *init_psk;               /**< Initiator's pre shared key */
+    size_t   init_psk_len;           /**< Length of init_psk in bytes */
+    uint8_t *resp_psk;               /**< Responder's pre shared key */
+    size_t   resp_psk_len;           /**< Length of resp_psk in bytes */
+    uint8_t *handshake_hash;         /**< Hash at the end of the handshake */
+    size_t   handshake_hash_len;     /**< Length of handshake_hash in bytes */
+    int      fail;                   /**< Failure expected on last message */
+    int      fallback;               /**< Handshake involves IK to XXfallback */
+    char    *fallback_pattern;       /**< Name of the pattern to fall back to */
     struct {
-        uint8_t *payload;           /**< Payload for this message */
-        size_t payload_len;         /**< Length of payload in bytes */
-        uint8_t *ciphertext;        /**< Ciphertext for this message */
-        size_t ciphertext_len;      /**< Length of ciphertext in bytes */
-    } messages[MAX_MESSAGES];       /**< All test messages */
-    size_t num_messages;            /**< Number of test messages */
+        uint8_t *payload;        /**< Payload for this message */
+        size_t   payload_len;    /**< Length of payload in bytes */
+        uint8_t *ciphertext;     /**< Ciphertext for this message */
+        size_t   ciphertext_len; /**< Length of ciphertext in bytes */
+    } messages[MAX_MESSAGES];    /**< All test messages */
+    size_t num_messages;         /**< Number of test messages */
 
 } TestVector;
 
@@ -86,10 +85,13 @@ typedef struct
  *
  * \param vec The test vector.
  */
-static void test_vector_free(TestVector *vec)
-{
+static void test_vector_free(TestVector *vec) {
     size_t index;
-    #define free_field(name) do { if (vec->name) free(vec->name); } while (0)
+#define free_field(name)     \
+    do {                     \
+        if (vec->name)       \
+            free(vec->name); \
+    } while (0)
     free_field(name);
     free_field(protocol_name);
     free_field(pattern);
@@ -127,10 +129,10 @@ static jmp_buf test_jump_back;
  *
  * \param message The failure message to print.
  */
-#define _fail(message)   \
-    do { \
+#define _fail(message)                                                  \
+    do {                                                                \
         printf("%s, failed at " __FILE__ ":%d\n", (message), __LINE__); \
-        longjmp(test_jump_back, 1); \
+        longjmp(test_jump_back, 1);                                     \
     } while (0)
 #define fail(message) _fail((message))
 
@@ -144,12 +146,12 @@ static jmp_buf test_jump_back;
  *
  * \param condition The boolean condition to test.
  */
-#define _verify(condition)   \
-    do { \
-        if (!(condition)) { \
+#define _verify(condition)                                               \
+    do {                                                                 \
+        if (!(condition)) {                                              \
             printf(#condition " failed at " __FILE__ ":%d\n", __LINE__); \
-            longjmp(test_jump_back, 1); \
-        } \
+            longjmp(test_jump_back, 1);                                  \
+        }                                                                \
     } while (0)
 #define verify(condition) _verify((condition))
 
@@ -159,20 +161,19 @@ static jmp_buf test_jump_back;
  * \param actual The actual value that was computed by the code under test.
  * \param expected The value that is expected.
  */
-#define compare(actual, expected) \
-    do { \
-        long long _actual = (long long)(actual); \
-        long long _expected = (long long)(expected); \
-        if (_actual != _expected) { \
+#define compare(actual, expected)                                               \
+    do {                                                                        \
+        long long _actual   = (long long) (actual);                             \
+        long long _expected = (long long) (expected);                           \
+        if (_actual != _expected) {                                             \
             printf(#actual " != " #expected " at " __FILE__ ":%d\n", __LINE__); \
-            printf("    actual  : %lld (0x%llx)\n", _actual, _actual); \
-            printf("    expected: %lld (0x%llx)\n", _expected, _expected); \
-            longjmp(test_jump_back, 1); \
-        } \
+            printf("    actual  : %lld (0x%llx)\n", _actual, _actual);          \
+            printf("    expected: %lld (0x%llx)\n", _expected, _expected);      \
+            longjmp(test_jump_back, 1);                                         \
+        }                                                                       \
     } while (0)
 
-static void dump_block(uint8_t *block, size_t len)
-{
+static void dump_block(uint8_t *block, size_t len) {
     size_t index;
     if (len > 16)
         printf("\n       ");
@@ -184,17 +185,17 @@ static void dump_block(uint8_t *block, size_t len)
     printf("\n");
 }
 
-#define compare_blocks(name, actual, actual_len, expected, expected_len)  \
-    do { \
-        if ((actual_len) != (expected_len) || \
-                memcmp((actual), (expected), (actual_len)) != 0) { \
-            printf("%s wrong at " __FILE__ ":%d\n", (name), __LINE__); \
-            printf("    actual  :"); \
-            dump_block((actual), (actual_len)); \
-            printf("    expected:"); \
-            dump_block((expected), (expected_len)); \
-            longjmp(test_jump_back, 1); \
-        } \
+#define compare_blocks(name, actual, actual_len, expected, expected_len) \
+    do {                                                                 \
+        if ((actual_len) != (expected_len)                               \
+            || memcmp((actual), (expected), (actual_len)) != 0) {        \
+            printf("%s wrong at " __FILE__ ":%d\n", (name), __LINE__);   \
+            printf("    actual  :");                                     \
+            dump_block((actual), (actual_len));                          \
+            printf("    expected:");                                     \
+            dump_block((expected), (expected_len));                      \
+            longjmp(test_jump_back, 1);                                  \
+        }                                                                \
     } while (0)
 
 /**
@@ -204,8 +205,7 @@ static void dump_block(uint8_t *block, size_t len)
  * \param category The identifier category.
  * \param name The name to check against.
  */
-static void check_id(int id, int category, const char *name)
-{
+static void check_id(int id, int category, const char *name) {
     const char *n = noise_id_to_name(category, id);
     verify(name != 0);
     verify(n != 0);
@@ -219,12 +219,11 @@ static void check_id(int id, int category, const char *name)
  *
  * \return Non-zero if the handshake pattern is one-way.
  */
-static int test_name_parsing(const TestVector *vec)
-{
+static int test_name_parsing(const TestVector *vec) {
     NoiseProtocolId id;
-    compare(noise_protocol_name_to_id
-                (&id, vec->protocol_name, strlen(vec->protocol_name)),
-            NOISE_ERROR_NONE);
+    compare(
+        noise_protocol_name_to_id(&id, vec->protocol_name, strlen(vec->protocol_name)),
+        NOISE_ERROR_NONE);
     if (vec->init_psk || vec->resp_psk)
         compare(id.prefix_id, NOISE_PREFIX_PSK);
     else
@@ -237,9 +236,8 @@ static int test_name_parsing(const TestVector *vec)
         check_id(id.hybrid_id, NOISE_DH_CATEGORY, vec->hybrid);
     else
         compare(id.hybrid_id, 0);
-    return id.pattern_id == NOISE_PATTERN_N ||
-           id.pattern_id == NOISE_PATTERN_X ||
-           id.pattern_id == NOISE_PATTERN_K;
+    return id.pattern_id == NOISE_PATTERN_N || id.pattern_id == NOISE_PATTERN_X
+           || id.pattern_id == NOISE_PATTERN_K;
 }
 
 /**
@@ -248,107 +246,106 @@ static int test_name_parsing(const TestVector *vec)
  * \param vec The test vector.
  * \param is_one_way Non-zero if the handshake pattern is one-way.
  */
-static void test_connection(const TestVector *vec, int is_one_way)
-{
+static void test_connection(const TestVector *vec, int is_one_way) {
     NoiseHandshakeState *initiator;
     NoiseHandshakeState *responder;
     NoiseHandshakeState *send;
     NoiseHandshakeState *recv;
-    NoiseDHState *dh;
-    NoiseCipherState *c1init;
-    NoiseCipherState *c2init;
-    NoiseCipherState *c1resp;
-    NoiseCipherState *c2resp;
-    NoiseCipherState *csend;
-    NoiseCipherState *crecv;
-    NoiseBuffer mbuf;
-    NoiseBuffer pbuf;
-    uint8_t message[MAX_MESSAGE_SIZE];
-    uint8_t payload[MAX_MESSAGE_SIZE];
-    size_t index;
-    size_t mac_len;
-    int role;
-    int fallback = vec->fallback;
+    NoiseDHState        *dh;
+    NoiseCipherState    *c1init;
+    NoiseCipherState    *c2init;
+    NoiseCipherState    *c1resp;
+    NoiseCipherState    *c2resp;
+    NoiseCipherState    *csend;
+    NoiseCipherState    *crecv;
+    NoiseBuffer          mbuf;
+    NoiseBuffer          pbuf;
+    uint8_t              message[MAX_MESSAGE_SIZE];
+    uint8_t              payload[MAX_MESSAGE_SIZE];
+    size_t               index;
+    size_t               mac_len;
+    int                  role;
+    int                  fallback = vec->fallback;
 
     /* Create the two ends of the connection */
-    compare(noise_handshakestate_new_by_name
-                (&initiator, vec->protocol_name, NOISE_ROLE_INITIATOR),
+    compare(noise_handshakestate_new_by_name(&initiator, vec->protocol_name,
+                                             NOISE_ROLE_INITIATOR),
             NOISE_ERROR_NONE);
-    compare(noise_handshakestate_new_by_name
-                (&responder, vec->protocol_name, NOISE_ROLE_RESPONDER),
+    compare(noise_handshakestate_new_by_name(&responder, vec->protocol_name,
+                                             NOISE_ROLE_RESPONDER),
             NOISE_ERROR_NONE);
 
     /* Set all keys that we need to use */
     if (vec->init_static) {
         dh = noise_handshakestate_get_local_keypair_dh(initiator);
-        compare(noise_dhstate_set_keypair_private
-                    (dh, vec->init_static, vec->init_static_len),
-                NOISE_ERROR_NONE);
+        compare(
+            noise_dhstate_set_keypair_private(dh, vec->init_static, vec->init_static_len),
+            NOISE_ERROR_NONE);
     }
     if (vec->init_public_static) {
         dh = noise_handshakestate_get_remote_public_key_dh(responder);
-        compare(noise_dhstate_set_public_key
-                    (dh, vec->init_public_static, vec->init_public_static_len),
+        compare(noise_dhstate_set_public_key(dh, vec->init_public_static,
+                                             vec->init_public_static_len),
                 NOISE_ERROR_NONE);
     }
     if (vec->resp_static) {
         dh = noise_handshakestate_get_local_keypair_dh(responder);
-        compare(noise_dhstate_set_keypair_private
-                    (dh, vec->resp_static, vec->resp_static_len),
-                NOISE_ERROR_NONE);
+        compare(
+            noise_dhstate_set_keypair_private(dh, vec->resp_static, vec->resp_static_len),
+            NOISE_ERROR_NONE);
     }
     if (vec->resp_public_static) {
         dh = noise_handshakestate_get_remote_public_key_dh(initiator);
-        compare(noise_dhstate_set_public_key
-                    (dh, vec->resp_public_static, vec->resp_public_static_len),
+        compare(noise_dhstate_set_public_key(dh, vec->resp_public_static,
+                                             vec->resp_public_static_len),
                 NOISE_ERROR_NONE);
     }
     if (vec->init_ephemeral) {
         dh = noise_handshakestate_get_fixed_ephemeral_dh(initiator);
-        compare(noise_dhstate_set_keypair_private
-                    (dh, vec->init_ephemeral, vec->init_ephemeral_len),
+        compare(noise_dhstate_set_keypair_private(dh, vec->init_ephemeral,
+                                                  vec->init_ephemeral_len),
                 NOISE_ERROR_NONE);
     }
     if (vec->init_hybrid) {
         dh = noise_handshakestate_get_fixed_hybrid_dh(initiator);
-        compare(noise_dhstate_set_keypair_private
-                    (dh, vec->init_hybrid, vec->init_hybrid_len),
-                NOISE_ERROR_NONE);
+        compare(
+            noise_dhstate_set_keypair_private(dh, vec->init_hybrid, vec->init_hybrid_len),
+            NOISE_ERROR_NONE);
     }
     /* Note: The test data contains responder ephemeral keys for one-way
        patterns which doesn't actually make sense.  Ignore those keys. */
     if (vec->resp_ephemeral && strlen(vec->pattern) != 1) {
         dh = noise_handshakestate_get_fixed_ephemeral_dh(responder);
-        compare(noise_dhstate_set_keypair_private
-                    (dh, vec->resp_ephemeral, vec->resp_ephemeral_len),
+        compare(noise_dhstate_set_keypair_private(dh, vec->resp_ephemeral,
+                                                  vec->resp_ephemeral_len),
                 NOISE_ERROR_NONE);
     }
     if (vec->resp_hybrid && strlen(vec->pattern) != 1) {
         dh = noise_handshakestate_get_fixed_hybrid_dh(responder);
-        compare(noise_dhstate_set_keypair_private
-                    (dh, vec->resp_hybrid, vec->resp_hybrid_len),
-                NOISE_ERROR_NONE);
+        compare(
+            noise_dhstate_set_keypair_private(dh, vec->resp_hybrid, vec->resp_hybrid_len),
+            NOISE_ERROR_NONE);
     }
 
     /* Set the prologues and pre shared keys */
     if (vec->init_prologue) {
-        compare(noise_handshakestate_set_prologue
-                    (initiator, vec->init_prologue, vec->init_prologue_len),
+        compare(noise_handshakestate_set_prologue(initiator, vec->init_prologue,
+                                                  vec->init_prologue_len),
                 NOISE_ERROR_NONE);
     }
     if (vec->resp_prologue) {
-        compare(noise_handshakestate_set_prologue
-                    (responder, vec->resp_prologue, vec->resp_prologue_len),
+        compare(noise_handshakestate_set_prologue(responder, vec->resp_prologue,
+                                                  vec->resp_prologue_len),
                 NOISE_ERROR_NONE);
     }
     if (vec->init_psk) {
-        compare(noise_handshakestate_set_pre_shared_key
-                    (initiator, vec->init_psk, vec->init_psk_len),
+        compare(noise_handshakestate_set_pre_shared_key(initiator, vec->init_psk,
+                                                        vec->init_psk_len),
                 NOISE_ERROR_NONE);
     }
     if (vec->resp_psk) {
-        compare(noise_handshakestate_set_pre_shared_key
-                    (responder, vec->resp_psk, vec->resp_psk_len),
+        compare(noise_handshakestate_set_pre_shared_key(responder, vec->resp_psk,
+                                                        vec->resp_psk_len),
                 NOISE_ERROR_NONE);
     }
 
@@ -359,8 +356,8 @@ static void test_connection(const TestVector *vec, int is_one_way)
     /* Work through the messages one by one until both sides "split" */
     role = NOISE_ROLE_INITIATOR;
     for (index = 0; index < vec->num_messages; ++index) {
-        if (noise_handshakestate_get_action(initiator) == NOISE_ACTION_SPLIT &&
-            noise_handshakestate_get_action(responder) == NOISE_ACTION_SPLIT) {
+        if (noise_handshakestate_get_action(initiator) == NOISE_ACTION_SPLIT
+            && noise_handshakestate_get_action(responder) == NOISE_ACTION_SPLIT) {
             break;
         }
         if (role == NOISE_ROLE_INITIATOR) {
@@ -375,15 +372,12 @@ static void test_connection(const TestVector *vec, int is_one_way)
             recv = initiator;
             role = NOISE_ROLE_INITIATOR;
         }
-        compare(noise_handshakestate_get_action(send),
-                NOISE_ACTION_WRITE_MESSAGE);
-        compare(noise_handshakestate_get_action(recv),
-                NOISE_ACTION_READ_MESSAGE);
+        compare(noise_handshakestate_get_action(send), NOISE_ACTION_WRITE_MESSAGE);
+        compare(noise_handshakestate_get_action(recv), NOISE_ACTION_READ_MESSAGE);
         noise_buffer_set_output(mbuf, message, sizeof(message));
         noise_buffer_set_input(pbuf, vec->messages[index].payload,
                                vec->messages[index].payload_len);
-        compare(noise_handshakestate_write_message(send, &mbuf, &pbuf),
-                NOISE_ERROR_NONE);
+        compare(noise_handshakestate_write_message(send, &mbuf, &pbuf), NOISE_ERROR_NONE);
         compare_blocks("ciphertext", mbuf.data, mbuf.size,
                        vec->messages[index].ciphertext,
                        vec->messages[index].ciphertext_len);
@@ -391,9 +385,9 @@ static void test_connection(const TestVector *vec, int is_one_way)
             /* Look up the pattern to fall back to */
             int fallback_id = NOISE_PATTERN_XX_FALLBACK;
             if (vec->fallback_pattern) {
-                fallback_id = noise_name_to_id
-                    (NOISE_PATTERN_CATEGORY, vec->fallback_pattern,
-                     strlen(vec->fallback_pattern));
+                fallback_id =
+                    noise_name_to_id(NOISE_PATTERN_CATEGORY, vec->fallback_pattern,
+                                     strlen(vec->fallback_pattern));
             }
 
             /* Perform a read on the responder, which will fail */
@@ -425,24 +419,22 @@ static void test_connection(const TestVector *vec, int is_one_way)
     /* Handshake finished.  Check the handshake hash values */
     if (vec->handshake_hash_len) {
         memset(payload, 0xAA, sizeof(payload));
-        compare(noise_handshakestate_get_handshake_hash
-                    (initiator, payload, vec->handshake_hash_len),
+        compare(noise_handshakestate_get_handshake_hash(initiator, payload,
+                                                        vec->handshake_hash_len),
                 NOISE_ERROR_NONE);
         compare_blocks("handshake_hash", payload, vec->handshake_hash_len,
                        vec->handshake_hash, vec->handshake_hash_len);
         memset(payload, 0xAA, sizeof(payload));
-        compare(noise_handshakestate_get_handshake_hash
-                    (responder, payload, vec->handshake_hash_len),
+        compare(noise_handshakestate_get_handshake_hash(responder, payload,
+                                                        vec->handshake_hash_len),
                 NOISE_ERROR_NONE);
         compare_blocks("handshake_hash", payload, vec->handshake_hash_len,
                        vec->handshake_hash, vec->handshake_hash_len);
     }
 
     /* Now handle the data transport */
-    compare(noise_handshakestate_split(initiator, &c1init, &c2init),
-            NOISE_ERROR_NONE);
-    compare(noise_handshakestate_split(responder, &c2resp, &c1resp),
-            NOISE_ERROR_NONE);
+    compare(noise_handshakestate_split(initiator, &c1init, &c2init), NOISE_ERROR_NONE);
+    compare(noise_handshakestate_split(responder, &c2resp, &c1resp), NOISE_ERROR_NONE);
     mac_len = noise_cipherstate_get_mac_length(c1init);
     for (; index < vec->num_messages; ++index) {
         if (role == NOISE_ROLE_INITIATOR) {
@@ -455,22 +447,18 @@ static void test_connection(const TestVector *vec, int is_one_way)
             /* Send on the responder, receive on the initiator */
             csend = c2resp;
             crecv = c2init;
-            role = NOISE_ROLE_INITIATOR;
+            role  = NOISE_ROLE_INITIATOR;
         }
         verify(sizeof(message) >= (vec->messages[index].payload_len + mac_len));
-        memcpy(message, vec->messages[index].payload,
-               vec->messages[index].payload_len);
+        memcpy(message, vec->messages[index].payload, vec->messages[index].payload_len);
         noise_buffer_set_inout(mbuf, message, vec->messages[index].payload_len,
                                sizeof(message));
-        compare(noise_cipherstate_encrypt(csend, &mbuf),
-                NOISE_ERROR_NONE);
+        compare(noise_cipherstate_encrypt(csend, &mbuf), NOISE_ERROR_NONE);
         compare_blocks("ciphertext", mbuf.data, mbuf.size,
                        vec->messages[index].ciphertext,
                        vec->messages[index].ciphertext_len);
-        compare(noise_cipherstate_decrypt(crecv, &mbuf),
-                NOISE_ERROR_NONE);
-        compare_blocks("plaintext", mbuf.data, mbuf.size,
-                       vec->messages[index].payload,
+        compare(noise_cipherstate_decrypt(crecv, &mbuf), NOISE_ERROR_NONE);
+        compare_blocks("plaintext", mbuf.data, mbuf.size, vec->messages[index].payload,
                        vec->messages[index].payload_len);
     }
 
@@ -491,8 +479,7 @@ static void test_connection(const TestVector *vec, int is_one_way)
  *
  * \return Non-zero if the test succeeded, zero if it failed.
  */
-static int test_vector_run(JSONReader *reader, const TestVector *vec)
-{
+static int test_vector_run(JSONReader *reader, const TestVector *vec) {
     int value;
     printf("%s ... ", vec->name);
     fflush(stdout);
@@ -517,8 +504,7 @@ static int test_vector_run(JSONReader *reader, const TestVector *vec)
  * \param token The token code.
  * \param name The token name for error reporting.
  */
-static void expect_token(JSONReader *reader, JSONToken token, const char *name)
-{
+static void expect_token(JSONReader *reader, JSONToken token, const char *name) {
     if (reader->errors)
         return;
     if (reader->token == token)
@@ -534,8 +520,7 @@ static void expect_token(JSONReader *reader, JSONToken token, const char *name)
  * \param reader The input stream.
  * \param name The field name.
  */
-static void expect_name(JSONReader *reader, const char *name)
-{
+static void expect_name(JSONReader *reader, const char *name) {
     if (reader->errors)
         return;
     if (json_is_name(reader, name)) {
@@ -552,12 +537,11 @@ static void expect_name(JSONReader *reader, const char *name)
  * \param reader The input stream.
  * \param value The location where to place the string value.
  */
-static void expect_string_field(JSONReader *reader, char **value)
-{
+static void expect_string_field(JSONReader *reader, char **value) {
     json_next_token(reader);
     expect_token(reader, JSON_TOKEN_COLON, ":");
     if (!reader->errors && reader->token == JSON_TOKEN_STRING) {
-        *value = reader->str_value;
+        *value            = reader->str_value;
         reader->str_value = 0;
         json_next_token(reader);
         if (!reader->errors && reader->token == JSON_TOKEN_COMMA)
@@ -572,8 +556,7 @@ static void expect_string_field(JSONReader *reader, char **value)
  *
  * \return The digit between 0 and 15, or -1 if \a ch is not hexadecimal.
  */
-static int from_hex_digit(int ch)
-{
+static int from_hex_digit(int ch) {
     if (ch >= '0' && ch <= '9')
         return ch - '0';
     else if (ch >= 'A' && ch <= 'F')
@@ -592,16 +575,15 @@ static int from_hex_digit(int ch)
  *
  * \return The size of the binary value in bytes.
  */
-static size_t expect_binary_field(JSONReader *reader, uint8_t **value)
-{
-    size_t size = 0;
-    size_t posn;
+static size_t expect_binary_field(JSONReader *reader, uint8_t **value) {
+    size_t      size = 0;
+    size_t      posn;
     const char *hex;
-    int digit1, digit2;
+    int         digit1, digit2;
     json_next_token(reader);
     expect_token(reader, JSON_TOKEN_COLON, ":");
     if (!reader->errors && reader->token == JSON_TOKEN_STRING) {
-        size = strlen(reader->str_value) / 2;
+        size   = strlen(reader->str_value) / 2;
         *value = calloc(1, size + 1);
         if (!(*value)) {
             json_error(reader, "Out of memory");
@@ -630,13 +612,12 @@ static size_t expect_binary_field(JSONReader *reader, uint8_t **value)
  * \param reader The input stream.
  * \return The boolean value.
  */
-static int expect_boolean_field(JSONReader *reader)
-{
+static int expect_boolean_field(JSONReader *reader) {
     int result = 0;
     json_next_token(reader);
     expect_token(reader, JSON_TOKEN_COLON, ":");
-    if (!reader->errors && (reader->token == JSON_TOKEN_TRUE ||
-                            reader->token == JSON_TOKEN_FALSE)) {
+    if (!reader->errors
+        && (reader->token == JSON_TOKEN_TRUE || reader->token == JSON_TOKEN_FALSE)) {
         result = (reader->token == JSON_TOKEN_TRUE);
         json_next_token(reader);
         if (!reader->errors && reader->token == JSON_TOKEN_COMMA)
@@ -652,11 +633,10 @@ static int expect_boolean_field(JSONReader *reader)
  *
  * \return Non-zero if the test succeeded, zero if it failed.
  */
-static int process_test_vector(JSONReader *reader)
-{
+static int process_test_vector(JSONReader *reader) {
     TestVector vec;
-    char protocol_name[NOISE_MAX_PROTOCOL_NAME];
-    int retval = 1;
+    char       protocol_name[NOISE_MAX_PROTOCOL_NAME];
+    int        retval = 1;
     memset(&vec, 0, sizeof(TestVector));
     while (!reader->errors && reader->token == JSON_TOKEN_STRING) {
         if (json_is_name(reader, "name")) {
@@ -673,48 +653,37 @@ static int process_test_vector(JSONReader *reader)
         } else if (json_is_name(reader, "hash")) {
             expect_string_field(reader, &(vec.hash));
         } else if (json_is_name(reader, "init_static")) {
-            vec.init_static_len =
-                expect_binary_field(reader, &(vec.init_static));
+            vec.init_static_len = expect_binary_field(reader, &(vec.init_static));
         } else if (json_is_name(reader, "init_remote_static")) {
             /* Refers to the initiator have pre-knowledge of the responder's
                public key, which is "resp_public_static" in TestVector */
             vec.resp_public_static_len =
                 expect_binary_field(reader, &(vec.resp_public_static));
         } else if (json_is_name(reader, "resp_static")) {
-            vec.resp_static_len =
-                expect_binary_field(reader, &(vec.resp_static));
+            vec.resp_static_len = expect_binary_field(reader, &(vec.resp_static));
         } else if (json_is_name(reader, "resp_remote_static")) {
             /* Refers to the responder have pre-knowledge of the initiator's
                public key, which is "init_public_static" in TestVector */
             vec.init_public_static_len =
                 expect_binary_field(reader, &(vec.init_public_static));
         } else if (json_is_name(reader, "init_ephemeral")) {
-            vec.init_ephemeral_len =
-                expect_binary_field(reader, &(vec.init_ephemeral));
+            vec.init_ephemeral_len = expect_binary_field(reader, &(vec.init_ephemeral));
         } else if (json_is_name(reader, "resp_ephemeral")) {
-            vec.resp_ephemeral_len =
-                expect_binary_field(reader, &(vec.resp_ephemeral));
+            vec.resp_ephemeral_len = expect_binary_field(reader, &(vec.resp_ephemeral));
         } else if (json_is_name(reader, "init_hybrid_ephemeral")) {
-            vec.init_hybrid_len =
-                expect_binary_field(reader, &(vec.init_hybrid));
+            vec.init_hybrid_len = expect_binary_field(reader, &(vec.init_hybrid));
         } else if (json_is_name(reader, "resp_hybrid_ephemeral")) {
-            vec.resp_hybrid_len =
-                expect_binary_field(reader, &(vec.resp_hybrid));
+            vec.resp_hybrid_len = expect_binary_field(reader, &(vec.resp_hybrid));
         } else if (json_is_name(reader, "init_prologue")) {
-            vec.init_prologue_len =
-                expect_binary_field(reader, &(vec.init_prologue));
+            vec.init_prologue_len = expect_binary_field(reader, &(vec.init_prologue));
         } else if (json_is_name(reader, "resp_prologue")) {
-            vec.resp_prologue_len =
-                expect_binary_field(reader, &(vec.resp_prologue));
+            vec.resp_prologue_len = expect_binary_field(reader, &(vec.resp_prologue));
         } else if (json_is_name(reader, "init_psk")) {
-            vec.init_psk_len =
-                expect_binary_field(reader, &(vec.init_psk));
+            vec.init_psk_len = expect_binary_field(reader, &(vec.init_psk));
         } else if (json_is_name(reader, "resp_psk")) {
-            vec.resp_psk_len =
-                expect_binary_field(reader, &(vec.resp_psk));
+            vec.resp_psk_len = expect_binary_field(reader, &(vec.resp_psk));
         } else if (json_is_name(reader, "handshake_hash")) {
-            vec.handshake_hash_len =
-                expect_binary_field(reader, &(vec.handshake_hash));
+            vec.handshake_hash_len = expect_binary_field(reader, &(vec.handshake_hash));
         } else if (json_is_name(reader, "fail")) {
             vec.fail = expect_boolean_field(reader);
         } else if (json_is_name(reader, "fallback")) {
@@ -733,13 +702,12 @@ static int process_test_vector(JSONReader *reader)
                 expect_token(reader, JSON_TOKEN_LBRACE, "{");
                 while (!reader->errors && reader->token == JSON_TOKEN_STRING) {
                     if (json_is_name(reader, "payload")) {
-                        vec.messages[vec.num_messages].payload_len =
-                            expect_binary_field
-                                (reader, &(vec.messages[vec.num_messages].payload));
+                        vec.messages[vec.num_messages].payload_len = expect_binary_field(
+                            reader, &(vec.messages[vec.num_messages].payload));
                     } else if (json_is_name(reader, "ciphertext")) {
                         vec.messages[vec.num_messages].ciphertext_len =
-                            expect_binary_field
-                                (reader, &(vec.messages[vec.num_messages].ciphertext));
+                            expect_binary_field(
+                                reader, &(vec.messages[vec.num_messages].ciphertext));
                     } else {
                         json_error(reader, "Unknown message field '%s'",
                                    reader->str_value);
@@ -762,11 +730,9 @@ static int process_test_vector(JSONReader *reader)
         }
     }
     snprintf(protocol_name, sizeof(protocol_name), "Noise%s_%s_%s%s%s_%s_%s",
-             (vec.init_psk || vec.resp_psk) ? "PSK" : "",
-             vec.pattern, vec.dh,
-             (vec.hybrid ? "+" : ""),
-             (vec.hybrid ? vec.hybrid : ""),
-             vec.cipher, vec.hash);
+             (vec.init_psk || vec.resp_psk) ? "PSK" : "", vec.pattern, vec.dh,
+             (vec.hybrid ? "+" : ""), (vec.hybrid ? vec.hybrid : ""), vec.cipher,
+             vec.hash);
     vec.protocol_name = strdup(protocol_name);
     if (!reader->errors) {
         retval = test_vector_run(reader, &vec);
@@ -780,8 +746,7 @@ static int process_test_vector(JSONReader *reader)
  *
  * \param reader The reader representing the input stream.
  */
-static void process_test_vectors(JSONReader *reader)
-{
+static void process_test_vectors(JSONReader *reader) {
     int ok = 1;
     printf("--------------------------------------------------------------\n");
     printf("Processing vectors from %s\n", reader->filename);
@@ -807,10 +772,9 @@ static void process_test_vectors(JSONReader *reader)
     }
 }
 
-static int process_file(const char *filename)
-{
-    int retval = 0;
-    FILE *file = fopen(filename, "r");
+static int process_file(const char *filename) {
+    int   retval = 0;
+    FILE *file   = fopen(filename, "r");
     if (file) {
         JSONReader reader;
         json_init(&reader, filename, file);
@@ -826,14 +790,8 @@ static int process_file(const char *filename)
     return retval;
 }
 
-int main(int argc, char *argv[])
-{
-    if (noise_init() != NOISE_ERROR_NONE) {
-        fprintf(stderr, "Noise initialization failed\n");
-        return 1;
-    }
-
-    int retval = 0;
+int main(int argc, char *argv[]) {
+    int   retval = 0;
     char *srcdir = getenv("srcdir");
     if (argc <= 1 && !srcdir) {
         fprintf(stderr, "Usage: %s vectors1.txt vectors2.txt ...\n", argv[0]);

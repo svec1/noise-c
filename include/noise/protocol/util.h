@@ -30,20 +30,17 @@
 extern "C" {
 #endif
 
-int noise_init(void);
-
-#define noise_new(type) ((type *)noise_new_object(sizeof(type)))
+#define noise_new(type) ((type *) noise_new_object(sizeof(type)))
 void *noise_new_object(size_t size);
-void noise_free(void *ptr, size_t size);
+void  noise_free(void *ptr, size_t size);
 
 void noise_clean(void *data, size_t size);
 
 int noise_is_equal(const void *s1, const void *s2, size_t size);
 int noise_is_zero(const void *data, size_t size);
 
-int noise_format_fingerprint
-    (int fingerprint_type, char *buffer, size_t len,
-     const uint8_t *public_key, size_t public_key_len);
+int noise_format_fingerprint(int fingerprint_type, char *buffer, size_t len,
+                             const uint8_t *public_key, size_t public_key_len);
 
 #ifdef __cplusplus
 };
