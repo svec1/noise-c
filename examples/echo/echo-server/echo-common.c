@@ -203,12 +203,6 @@ int echo_get_protocol_id(EchoProtocolId *id, const char *name) {
         case NOISE_HASH_SHA512:
             id->hash = ECHO_HASH_SHA512;
             break;
-        case NOISE_HASH_BLAKE2s:
-            id->hash = ECHO_HASH_BLAKE2s;
-            break;
-        case NOISE_HASH_BLAKE2b:
-            id->hash = ECHO_HASH_BLAKE2b;
-            break;
         default:
             ok = 0;
             break;
@@ -353,12 +347,6 @@ int echo_to_noise_protocol_id(NoiseProtocolId *nid, const EchoProtocolId *id) {
             break;
         case ECHO_HASH_SHA512:
             nid->hash_id = NOISE_HASH_SHA512;
-            break;
-        case ECHO_HASH_BLAKE2s:
-            nid->hash_id = NOISE_HASH_BLAKE2s;
-            break;
-        case ECHO_HASH_BLAKE2b:
-            nid->hash_id = NOISE_HASH_BLAKE2b;
             break;
         default:
             ok = 0;

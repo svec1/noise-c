@@ -364,17 +364,17 @@ static void check_handshake_protocol(const char *name) {
 }
 
 static void handshakestate_check_protocols(void) {
-    check_handshake_protocol("Noise_N_25519_ChaChaPoly_BLAKE2s");
-    check_handshake_protocol("Noise_K_25519_AESGCM_SHA256");
+    check_handshake_protocol("Noise_N_25519_ChaChaPoly_SHA256");
+    check_handshake_protocol("Noise_K_25519_AESGCM_SHA3512");
 
-    check_handshake_protocol("NoisePSK_N_25519_ChaChaPoly_BLAKE2s");
-    check_handshake_protocol("NoisePSK_K_25519_AESGCM_SHA256");
+    check_handshake_protocol("NoisePSK_N_25519_ChaChaPoly_SHA256");
+    check_handshake_protocol("NoisePSK_K_25519_AESGCM_SHA3256");
 
-    check_handshake_protocol("Noise_NN_25519_ChaChaPoly_BLAKE2s");
-    check_handshake_protocol("Noise_NX_25519_AESGCM_BLAKE2b");
+    check_handshake_protocol("Noise_NN_25519_ChaChaPoly_SHA256");
+    check_handshake_protocol("Noise_NX_25519_AESGCM_SHA3256");
 
-    check_handshake_protocol("NoisePSK_NN_25519_ChaChaPoly_BLAKE2s");
-    check_handshake_protocol("NoisePSK_NX_25519_AESGCM_BLAKE2b");
+    check_handshake_protocol("NoisePSK_NN_25519_ChaChaPoly_SHA256");
+    check_handshake_protocol("NoisePSK_NX_25519_AESGCM_SHA3256");
 
     check_handshake_protocol("Noise_XK_25519_AESGCM_SHA256");
     check_handshake_protocol("Noise_XX_25519_ChaChaPoly_SHA512");
@@ -382,15 +382,15 @@ static void handshakestate_check_protocols(void) {
     check_handshake_protocol("NoisePSK_XK_25519_AESGCM_SHA256");
     check_handshake_protocol("NoisePSK_XX_25519_ChaChaPoly_SHA512");
 
-    check_handshake_protocol("Noise_KK_25519_AESGCM_BLAKE2b");
+    check_handshake_protocol("Noise_KK_25519_AESGCM_SHA3512");
 
-    check_handshake_protocol("NoisePSK_KK_25519_AESGCM_BLAKE2b");
+    check_handshake_protocol("NoisePSK_KK_25519_AESGCM_SHA3512");
 
-    check_handshake_protocol("Noise_IN_25519_ChaChaPoly_BLAKE2s");
-    check_handshake_protocol("Noise_IK_25519_AESGCM_BLAKE2b");
+    check_handshake_protocol("Noise_IN_25519_ChaChaPoly_SHA3512");
+    check_handshake_protocol("Noise_IK_25519_AESGCM_SHA3512");
 
-    check_handshake_protocol("NoisePSK_IN_25519_ChaChaPoly_BLAKE2s");
-    check_handshake_protocol("NoisePSK_IK_25519_AESGCM_BLAKE2b");
+    check_handshake_protocol("NoisePSK_IN_25519_ChaChaPoly_SHA256");
+    check_handshake_protocol("NoisePSK_IK_25519_AESGCM_SHA3512");
 }
 
 /* Check that "IK" correctly falls back to "XXfallback" */
@@ -567,7 +567,7 @@ static void check_fallback_protocol(const char *name, int fallback_anyway,
 }
 
 static void handshakestate_check_fallback(void) {
-    check_fallback_protocol("Noise_IK_25519_ChaChaPoly_BLAKE2s", 0, 0);
+    check_fallback_protocol("Noise_IK_25519_ChaChaPoly_SHA256", 0, 0);
 }
 
 static void handshakestate_check_errors(void) {
@@ -595,11 +595,11 @@ static void handshakestate_check_errors(void) {
             NOISE_ERROR_INVALID_PARAM);
     verify(state == NULL);
     state = (NoiseHandshakeState *) 8;
-    compare(noise_handshakestate_new_by_name(&state, "Noise_XX_25519_ChaChaPony_BLAKE2s",
+    compare(noise_handshakestate_new_by_name(&state, "Noise_XX_25519_ChaChaPony_SHA256",
                                              NOISE_ROLE_INITIATOR),
             NOISE_ERROR_UNKNOWN_NAME);
     state = (NoiseHandshakeState *) 8;
-    compare(noise_handshakestate_new_by_name(&state, "Noise_XX_25519_ChaChaPoly_BLAKE2s",
+    compare(noise_handshakestate_new_by_name(&state, "Noise_XX_25519_ChaChaPoly_SHA256",
                                              NOISE_DH_CURVE25519),
             NOISE_ERROR_INVALID_PARAM);
     verify(state == NULL);
@@ -607,7 +607,7 @@ static void handshakestate_check_errors(void) {
     id.pattern_id = NOISE_PATTERN_XX;
     id.dh_id      = NOISE_DH_CURVE25519;
     id.cipher_id  = NOISE_CIPHER_CHACHAPOLY;
-    id.hash_id    = NOISE_HASH_BLAKE2s;
+    id.hash_id    = NOISE_HASH_SHA256;
     state         = (NoiseHandshakeState *) 8;
     compare(noise_handshakestate_new_by_id(&state, &id, NOISE_DH_CURVE25519),
             NOISE_ERROR_INVALID_PARAM);

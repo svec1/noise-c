@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
-option(CNOISE_PROTOBUFS "Compile source of protobufs." OFF)
 option(CNOISE_EXAMPLES "Compile examples." OFF)
 option(CNOISE_TESTS "Compile tests." ON)
 option(CNOISE_VECTOR_TESTS "Compile vector tests." OFF)
@@ -35,13 +34,9 @@ add_custom_target(
 )
 find_package(LibreSSL REQUIRED)
 
-# Builds BLAKE2
-file(GLOB_RECURSE BLAKE2_SOURCE_FILES thirdparty/BLAKE2/ref/*.c)
-add_library(BLAKE2 STATIC ${BLAKE2_SOURCE_FILES})
-
 add_library(${NAME_PROJECT_CNOISE} STATIC ${CNOISE_SOURCE_FILES})
 
-target_link_libraries(${NAME_PROJECT_CNOISE} LibreSSL::Crypto BLAKE2)
+target_link_libraries(${NAME_PROJECT_CNOISE} LibreSSL::Crypto)
 target_include_directories(
     ${NAME_PROJECT_CNOISE}
     PRIVATE
@@ -49,7 +44,6 @@ target_include_directories(
     PUBLIC
     ${CNOISE_INCLUDE_DIR}
     thirdparty/portable/include
-    thirdparty/BLAKE2/ref
     thirdparty/mlkem-libjade/src
 )
 
@@ -93,6 +87,8 @@ if(CNOISE_TESTS)
         src/
     )
     
+    target_compile_options(${NAME_TEST_UNITS_CNOISE} PRIVATE -g)
+
     add_test(NAME TEST_UNITS_CNOISE COMMAND ${NAME_TEST_UNITS_CNOISE})
     add_test(NAME TEST_PERFORMANCE_CNOISE COMMAND ${NAME_TEST_PERFORMANCE_CNOISE})
 endif()

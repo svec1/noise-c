@@ -40,10 +40,10 @@ extern "C" {
 /* Hash algorithms */
 #define NOISE_HASH_NONE 0
 #define NOISE_HASH_CATEGORY NOISE_ID('H', 0)
-#define NOISE_HASH_BLAKE2s NOISE_ID('H', 1)
-#define NOISE_HASH_BLAKE2b NOISE_ID('H', 2)
-#define NOISE_HASH_SHA256 NOISE_ID('H', 3)
-#define NOISE_HASH_SHA512 NOISE_ID('H', 4)
+#define NOISE_HASH_SHA256 NOISE_ID('H', 1)
+#define NOISE_HASH_SHA512 NOISE_ID('H', 2)
+#define NOISE_HASH_SHA3256 NOISE_ID('H', 3)
+#define NOISE_HASH_SHA3512 NOISE_ID('H', 4)
 
 /* Diffie-Hellman algorithms */
 #define NOISE_DH_NONE 0
@@ -100,11 +100,6 @@ extern "C" {
 #define NOISE_PREFIX_CATEGORY NOISE_ID('N', 0)
 #define NOISE_PREFIX_STANDARD NOISE_ID('N', 1)
 #define NOISE_PREFIX_PSK NOISE_ID('N', 2)
-
-/* Signature algorithms */
-#define NOISE_SIGN_NONE 0
-#define NOISE_SIGN_CATEGORY NOISE_ID('S', 0)
-#define NOISE_SIGN_ED25519 NOISE_ID('S', 1)
 
 /* Role for this end of the communications */
 #define NOISE_ROLE_INITIATOR NOISE_ID('R', 1)

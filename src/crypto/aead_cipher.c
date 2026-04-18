@@ -66,7 +66,6 @@ NoiseCipherState *noise_aead_cipher_new(uint16_t type) {
     if (!st)
         return NULL;
 
-    st->ctx = EVP_AEAD_CTX_new();
     if (type == NOISE_CIPHER_AESGCM)
         st->aead = EVP_aead_aes_256_gcm();
     else if (type == NOISE_CIPHER_CHACHAPOLY)
@@ -74,6 +73,7 @@ NoiseCipherState *noise_aead_cipher_new(uint16_t type) {
     else
         return NULL;
     memset(st->nonce, 0, sizeof(st->nonce));
+    st->ctx = EVP_AEAD_CTX_new();
 
     st->parent.cipher_id = type;
     st->parent.key_len   = EVP_AEAD_key_length(st->aead);

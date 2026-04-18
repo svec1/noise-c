@@ -58,10 +58,10 @@ static NoiseIdMapping const algorithm_names[] = {
     {NOISE_CIPHER_AESGCM, "AESGCM", 6},
 
     /* Hash algorithms */
-    {NOISE_HASH_BLAKE2s, "BLAKE2s", 7},
-    {NOISE_HASH_BLAKE2b, "BLAKE2b", 7},
     {NOISE_HASH_SHA256, "SHA256", 6},
     {NOISE_HASH_SHA512, "SHA512", 6},
+    {NOISE_HASH_SHA3256, "SHA3256", 7},
+    {NOISE_HASH_SHA3512, "SHA3512", 7},
 
     /* Diffie-Hellman algorithms */
     {NOISE_DH_CURVE25519, "25519", 5},
@@ -112,9 +112,6 @@ static NoiseIdMapping const algorithm_names[] = {
     /* Protocol name prefixes */
     {NOISE_PREFIX_STANDARD, "Noise", 5},
     {NOISE_PREFIX_PSK, "NoisePSK", 8},
-
-    /* Signature algorithms */
-    {NOISE_SIGN_ED25519, "Ed25519", 7},
 
     /* Terminator for the list */
     {0, 0, 0}};

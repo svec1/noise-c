@@ -55,10 +55,10 @@ static void test_id_mappings(void) {
     check_id("ChaChaPoly", NOISE_CIPHER_CHACHAPOLY);
     check_id("AESGCM", NOISE_CIPHER_AESGCM);
 
-    check_id("BLAKE2s", NOISE_HASH_BLAKE2s);
-    check_id("BLAKE2b", NOISE_HASH_BLAKE2b);
     check_id("SHA256", NOISE_HASH_SHA256);
     check_id("SHA512", NOISE_HASH_SHA512);
+    check_id("SHA3256", NOISE_HASH_SHA3256);
+    check_id("SHA3512", NOISE_HASH_SHA3512);
 
     check_id("25519", NOISE_DH_CURVE25519);
     check_id("Kyber1024", NOISE_DH_KYBER1024);
@@ -106,8 +106,6 @@ static void test_id_mappings(void) {
 
     check_id("Noise", NOISE_PREFIX_STANDARD);
     check_id("NoisePSK", NOISE_PREFIX_PSK);
-
-    check_id("Ed25519", NOISE_SIGN_ED25519);
 
     /* Check for unknown names/identifiers */
     compare(noise_name_to_id(NOISE_CIPHER_CATEGORY, "AESGCM-128", 10), 0);
@@ -207,21 +205,21 @@ static void test_protocol_names(void) {
     check_protocol_name("Noise_XX_25519_AESGCM_SHA256", NOISE_PREFIX_STANDARD,
                         NOISE_PATTERN_XX, NOISE_DH_CURVE25519, NOISE_CIPHER_AESGCM,
                         NOISE_HASH_SHA256, 0);
-    check_protocol_name("Noise_N_25519_ChaChaPoly_BLAKE2s", NOISE_PREFIX_STANDARD,
+    check_protocol_name("Noise_N_25519_ChaChaPoly_SHA256", NOISE_PREFIX_STANDARD,
                         NOISE_PATTERN_N, NOISE_DH_CURVE25519, NOISE_CIPHER_CHACHAPOLY,
-                        NOISE_HASH_BLAKE2s, 0);
+                        NOISE_HASH_SHA256, 0);
     check_protocol_name("NoisePSK_XX_25519_AESGCM_SHA256", NOISE_PREFIX_PSK,
                         NOISE_PATTERN_XX, NOISE_DH_CURVE25519, NOISE_CIPHER_AESGCM,
                         NOISE_HASH_SHA256, 0);
-    check_protocol_name("NoisePSK_N_25519_ChaChaPoly_BLAKE2s", NOISE_PREFIX_PSK,
+    check_protocol_name("NoisePSK_N_25519_ChaChaPoly_SHA3256", NOISE_PREFIX_PSK,
                         NOISE_PATTERN_N, NOISE_DH_CURVE25519, NOISE_CIPHER_CHACHAPOLY,
-                        NOISE_HASH_BLAKE2s, 0);
+                        NOISE_HASH_SHA3256, 0);
     check_protocol_name("Noise_NN_Kyber1024_AESGCM_SHA256", NOISE_PREFIX_STANDARD,
                         NOISE_PATTERN_NN, NOISE_DH_KYBER1024, NOISE_CIPHER_AESGCM,
                         NOISE_HASH_SHA256, 0);
-    check_protocol_name("Noise_XX_25519+Kyber1024_AESGCM_SHA256", NOISE_PREFIX_STANDARD,
+    check_protocol_name("Noise_XX_25519+Kyber1024_AESGCM_SHA3512", NOISE_PREFIX_STANDARD,
                         NOISE_PATTERN_XX, NOISE_DH_CURVE25519, NOISE_CIPHER_AESGCM,
-                        NOISE_HASH_SHA256, NOISE_DH_KYBER1024);
+                        NOISE_HASH_SHA3512, NOISE_DH_KYBER1024);
 }
 
 void test_names(void) {

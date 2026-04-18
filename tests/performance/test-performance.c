@@ -284,10 +284,10 @@ int main(int argc, char *argv[]) {
     printf("%-20s%8.2f          %8.2f\n", "MD5 calibration", 1.0 / units, 1.0);
 
     /* Measure the performance of the hashing primitives */
-    perf_hash(NOISE_HASH_BLAKE2s);
-    perf_hash(NOISE_HASH_BLAKE2b);
     perf_hash(NOISE_HASH_SHA256);
     perf_hash(NOISE_HASH_SHA512);
+    perf_hash(NOISE_HASH_SHA3256);
+    perf_hash(NOISE_HASH_SHA3512);
 
     /* Measure the performance of the AEAD primitives */
     perf_cipher(NOISE_CIPHER_CHACHAPOLY);
